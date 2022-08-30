@@ -1,0 +1,54 @@
+shawnshtang_shawnshtan-PC1_2312 ClientRender
+p4 changes -c shawnshtang_shawnshtan-PC1_2312
+
+694585
+
+
+p4 changes -u shawnshtang
+p4 changes -c shawnshtang_shawnshtan-PC1_2312
+p4 change 
+p4 edit -c changelist filename
+
+return 1；
+}
+
+
+751 473
+
+r.Mobile.ClusteredShading = 1
+
+#undef SMOBILE_IBL_QUALITY_LEVEL
+#define SMOBILE_IBL_QUALITY_LEVEL  0
+
+{
+
+
+#if MATERIAL_QUALITY == 0
+
+#ifdef S1
+#undef S1
+#endif
+#define S1 0
+
+#ifdef S2
+#undef S2
+#endif
+#define S2 0
+
+#elif MATERIAL_QUALITY == 1
+
+#ifdef S1
+#undef S1
+#endif
+#define S1 0
+
+#elif MATERIAL_QUALITY == 2
+
+#endif
+
+at 1:30 shutdown -s
+
+
+
+
+
