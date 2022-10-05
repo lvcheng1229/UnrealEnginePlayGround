@@ -1145,7 +1145,7 @@ void FParallelMeshDrawCommandPass::DispatchPassSetup(
 	FMemory::Memswap(&TaskContext.MeshDrawCommands, &InOutMeshDrawCommands, sizeof(InOutMeshDrawCommands));
 	FMemory::Memswap(&TaskContext.DynamicMeshCommandBuildRequests, &InOutDynamicMeshCommandBuildRequests, sizeof(InOutDynamicMeshCommandBuildRequests));
 
-	if (TaskContext.ShadingPath == EShadingPath::Mobile && TaskContext.PassType == EMeshPass::BasePass)
+	if ((TaskContext.ShadingPath == EShadingPath::Mobile/* || TaskContext.ShadingPath == EShadingPath::XMobile*/) && TaskContext.PassType == EMeshPass::BasePass)
 	{
 		FMemory::Memswap(&TaskContext.MobileBasePassCSMMeshDrawCommands, InOutMobileBasePassCSMMeshDrawCommands, sizeof(*InOutMobileBasePassCSMMeshDrawCommands));
 	}

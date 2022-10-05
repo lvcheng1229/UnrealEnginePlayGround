@@ -20,6 +20,13 @@ enum class EShadingPath
 {
 	Mobile,
 	Deferred,
+
+	//shawnB
+
+	//XMobile,
+
+	//shawnE
+
 	Num,
 };
 

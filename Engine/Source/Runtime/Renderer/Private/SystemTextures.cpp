@@ -18,6 +18,8 @@ SystemTextures
 
 RDG_REGISTER_BLACKBOARD_STRUCT(FRDGSystemTextures);
 
+PRAGMA_DISABLE_OPTIMIZATION
+
 const FRDGSystemTextures& FRDGSystemTextures::Create(FRDGBuilder& GraphBuilder)
 {
 	const auto Register = [&](const TRefCountPtr<IPooledRenderTarget>& RenderTarget)

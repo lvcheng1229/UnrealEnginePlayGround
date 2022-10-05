@@ -507,8 +507,10 @@ public:
 		}
 		else
 		{
+			//return EShadingPath::XMobile;
 			return EShadingPath::Mobile;
 		}
+		
 	}
 
 	EShadingPath GetShadingPath() const

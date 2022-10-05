@@ -77,6 +77,9 @@
 #include "Rendering/NaniteCoarseMeshStreamingManager.h"
 #include "Rendering/NaniteStreamingManager.h"
 
+//shawnshtang
+#include "XSceneRendering.h"
+
 /*-----------------------------------------------------------------------------
 	Globals
 -----------------------------------------------------------------------------*/
@@ -130,9 +133,11 @@ FAutoConsoleVariableRef CVarDumpMeshDrawCommandMemoryStats(
 /**
  * Console variable controlling whether or not occlusion queries are allowed.
  */
+
+//TangGram
 static TAutoConsoleVariable<int32> CVarAllowOcclusionQueries(
 	TEXT("r.AllowOcclusionQueries"),
-	1,
+	0,
 	TEXT("If zero, occlusion queries will not be used to cull primitives."),
 	ECVF_RenderThreadSafe
 	);
@@ -3681,7 +3686,7 @@ FSceneRenderer* FSceneRenderer::CreateSceneRenderer(const FSceneViewFamily* InVi
 {
 	EShadingPath ShadingPath = InViewFamily->Scene->GetShadingPath();
 	FSceneRenderer* SceneRenderer = nullptr;
-
+//tanggram
 	if (ShadingPath == EShadingPath::Deferred)
 	{
 		SceneRenderer = new FDeferredShadingSceneRenderer(InViewFamily, HitProxyConsumer);
@@ -3691,10 +3696,11 @@ FSceneRenderer* FSceneRenderer::CreateSceneRenderer(const FSceneViewFamily* InVi
 		GMultiViewFamilyOrigins.Empty();
 #endif  // WITH_MGPU
 	}
-	else 
+	else if(ShadingPath == EShadingPath::Mobile)
 	{
-		check(ShadingPath == EShadingPath::Mobile);
-		SceneRenderer = new FMobileSceneRenderer(InViewFamily, HitProxyConsumer);
+		
+		SceneRenderer = new FXMobileSceneRenderer(InViewFamily, HitProxyConsumer);
+		//SceneRenderer = new FMobileSceneRenderer(InViewFamily, HitProxyConsumer);
 	}
 
 	return SceneRenderer;

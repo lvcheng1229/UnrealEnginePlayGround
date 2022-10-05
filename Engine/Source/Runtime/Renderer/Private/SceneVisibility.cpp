@@ -4529,12 +4529,13 @@ void FSceneRenderer::ComputeViewVisibility(
 				}
 			}
 
+			//TangGram
 			// Occlusion cull for all primitives in the view frustum, but not in wireframe.
-			if (!View.Family->EngineShowFlags.Wireframe)
-			{
-				int32 NumOccludedPrimitivesInView = OcclusionCull(RHICmdList, Scene, View, DynamicVertexBuffer);
-				STAT(NumOccludedPrimitives += NumOccludedPrimitivesInView);
-			}
+			//if (!View.Family->EngineShowFlags.Wireframe)
+			//{
+			//	int32 NumOccludedPrimitivesInView = OcclusionCull(RHICmdList, Scene, View, DynamicVertexBuffer);
+			//	STAT(NumOccludedPrimitives += NumOccludedPrimitivesInView);
+			//}
 
 			{
 				QUICK_SCOPE_CYCLE_COUNTER(STAT_ViewVisibilityTime_ConditionalUpdateStaticMeshes);
