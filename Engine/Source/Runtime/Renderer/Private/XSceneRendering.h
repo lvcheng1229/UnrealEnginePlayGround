@@ -14,6 +14,7 @@ protected:
 	void RenderForwardMultiPass(FRDGBuilder& GraphBuilder, class FXMobileRenderPassParameters* PassParameters, FRenderTargetBindingSlots& BasePassRenderTargets, int32 ViewIndex, FViewInfo& View, FSceneTextures& SceneTextures);
 	void RenderMobileBasePass(FRHICommandListImmediate& RHICmdList, const FViewInfo& View);
 	void SetupMobileBasePassAfterShadowInit(FExclusiveDepthStencil::Type BasePassDepthStencilAccess, FViewVisibleCommandsPerView& ViewCommandsPerView, FInstanceCullingManager& InstanceCullingManager);
+	//void UpdateSkyReflectionUniformBuffer();
 private:
 	bool bRequiresSceneDepthAux;
 	bool bKeepDepthContent;

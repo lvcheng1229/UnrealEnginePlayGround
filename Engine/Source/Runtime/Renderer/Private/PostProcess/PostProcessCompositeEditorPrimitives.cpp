@@ -457,61 +457,63 @@ FScreenPassTexture AddEditorPrimitivePass(
 					TStaticDepthStencilState<true, CF_Always>::GetRHI());
 			}
 		}
-
+		//TanGram
 		// Draws the editors primitives
-		{
-			FEditorPrimitivesPassParameters* PassParameters = GraphBuilder.AllocParameters<FEditorPrimitivesPassParameters>();
-			PassParameters->View = EditorView->GetShaderParameters();
-			PassParameters->ReflectionCapture = View.ReflectionCaptureUniformBuffer;
-			PassParameters->InstanceCulling = InstanceCullingManager.GetDummyInstanceCullingUniformBuffer();
-			PassParameters->RenderTargets[0] = FRenderTargetBinding(EditorPrimitiveColor, ERenderTargetLoadAction::ELoad);
-			PassParameters->RenderTargets.DepthStencil = FDepthStencilBinding(EditorPrimitiveDepth, ERenderTargetLoadAction::ELoad, ERenderTargetLoadAction::ELoad, FExclusiveDepthStencil::DepthWrite_StencilWrite);
-
-			const FEditorPrimitiveInputs::EBasePassType BasePassType = Inputs.BasePassType;
-
-			if (BasePassType == FEditorPrimitiveInputs::EBasePassType::Deferred)
-			{
-				PassParameters->BasePass = CreateOpaqueBasePassUniformBuffer(GraphBuilder, *EditorView, 0);
-			}
-			else
-			{
-				PassParameters->MobileBasePass = CreateMobileBasePassUniformBuffer(GraphBuilder, *EditorView, EMobileBasePass::Translucent, EMobileSceneTextureSetupMode::None);
-			}
-
-			GraphBuilder.AddPass(
-				RDG_EVENT_NAME("EditorPrimitives %dx%d MSAA=%d",
-					EditorPrimitivesViewport.Rect.Width(),
-					EditorPrimitivesViewport.Rect.Height(),
-					NumSamples),
-				PassParameters,
-				ERDGPassFlags::Raster,
-				[&View, &InstanceCullingManager, PassParameters, EditorView, EditorPrimitivesViewport, BasePassType, NumSamples](FRHICommandListImmediate& RHICmdList)
-			{
-				RHICmdList.SetViewport(EditorPrimitivesViewport.Rect.Min.X, EditorPrimitivesViewport.Rect.Min.Y, 0.0f, EditorPrimitivesViewport.Rect.Max.X, EditorPrimitivesViewport.Rect.Max.Y, 1.0f);
-
-				FMeshPassProcessorRenderState DrawRenderState;
-				DrawRenderState.SetDepthStencilAccess(FExclusiveDepthStencil::DepthWrite_StencilWrite);
-				DrawRenderState.SetBlendState(TStaticBlendStateWriteMask<CW_RGBA>::GetRHI());
-
-				// Draw editor primitives.
-				{
-					SCOPED_DRAW_EVENTF(RHICmdList, EditorPrimitives,
-						TEXT("RenderViewEditorPrimitives %dx%d msaa=%d"),
-						EditorPrimitivesViewport.Rect.Width(), EditorPrimitivesViewport.Rect.Height(), NumSamples);
-
-					RenderEditorPrimitives(RHICmdList, *EditorView, DrawRenderState, InstanceCullingManager);
-				}
-
-				// Draw foreground editor primitives.
-				{
-					SCOPED_DRAW_EVENTF(RHICmdList, EditorPrimitives,
-						TEXT("RenderViewEditorForegroundPrimitives %dx%d msaa=%d"),
-						EditorPrimitivesViewport.Rect.Width(), EditorPrimitivesViewport.Rect.Height(), NumSamples);
-
-					RenderForegroundEditorPrimitives(RHICmdList, *EditorView, DrawRenderState, InstanceCullingManager);
-				}
-			});
-		}
+		//{
+		//	FEditorPrimitivesPassParameters* PassParameters = GraphBuilder.AllocParameters<FEditorPrimitivesPassParameters>();
+		//	PassParameters->View = EditorView->GetShaderParameters();
+		//	PassParameters->ReflectionCapture = View.ReflectionCaptureUniformBuffer;
+		//	PassParameters->InstanceCulling = InstanceCullingManager.GetDummyInstanceCullingUniformBuffer();
+		//	PassParameters->RenderTargets[0] = FRenderTargetBinding(EditorPrimitiveColor, ERenderTargetLoadAction::ELoad);
+		//	PassParameters->RenderTargets.DepthStencil = FDepthStencilBinding(EditorPrimitiveDepth, ERenderTargetLoadAction::ELoad, ERenderTargetLoadAction::ELoad, FExclusiveDepthStencil::DepthWrite_StencilWrite);
+		//
+		//	const FEditorPrimitiveInputs::EBasePassType BasePassType = Inputs.BasePassType;
+		//
+		//	if (BasePassType == FEditorPrimitiveInputs::EBasePassType::Deferred)
+		//	{
+		//		PassParameters->BasePass = CreateOpaqueBasePassUniformBuffer(GraphBuilder, *EditorView, 0);
+		//	}
+		//	else
+		//	{
+		//		PassParameters->MobileBasePass = CreateMobileBasePassUniformBuffer(GraphBuilder, *EditorView, EMobileBasePass::Translucent, EMobileSceneTextureSetupMode::None);
+		//	}
+		//
+		//	GraphBuilder.AddPass(
+		//		RDG_EVENT_NAME("EditorPrimitives %dx%d MSAA=%d",
+		//			EditorPrimitivesViewport.Rect.Width(),
+		//			EditorPrimitivesViewport.Rect.Height(),
+		//			NumSamples),
+		//		PassParameters,
+		//		ERDGPassFlags::Raster,
+		//		[&View, &InstanceCullingManager, PassParameters, EditorView, EditorPrimitivesViewport, BasePassType, NumSamples](FRHICommandListImmediate& RHICmdList)
+		//	{
+		//		RHICmdList.SetViewport(EditorPrimitivesViewport.Rect.Min.X, EditorPrimitivesViewport.Rect.Min.Y, 0.0f, EditorPrimitivesViewport.Rect.Max.X, EditorPrimitivesViewport.Rect.Max.Y, 1.0f);
+		//
+		//		FMeshPassProcessorRenderState DrawRenderState;
+		//		DrawRenderState.SetDepthStencilAccess(FExclusiveDepthStencil::DepthWrite_StencilWrite);
+		//		DrawRenderState.SetBlendState(TStaticBlendStateWriteMask<CW_RGBA>::GetRHI());
+		//
+		//		//TanGram
+		//
+		//		// Draw editor primitives.
+		//		//{
+		//		//	SCOPED_DRAW_EVENTF(RHICmdList, EditorPrimitives,
+		//		//		TEXT("RenderViewEditorPrimitives %dx%d msaa=%d"),
+		//		//		EditorPrimitivesViewport.Rect.Width(), EditorPrimitivesViewport.Rect.Height(), NumSamples);
+		//		//
+		//		//	RenderEditorPrimitives(RHICmdList, *EditorView, DrawRenderState, InstanceCullingManager);
+		//		//}
+		//
+		//		// Draw foreground editor primitives.
+		//		//{
+		//		//	SCOPED_DRAW_EVENTF(RHICmdList, EditorPrimitives,
+		//		//		TEXT("RenderViewEditorForegroundPrimitives %dx%d msaa=%d"),
+		//		//		EditorPrimitivesViewport.Rect.Width(), EditorPrimitivesViewport.Rect.Height(), NumSamples);
+		//		//
+		//		//	RenderForegroundEditorPrimitives(RHICmdList, *EditorView, DrawRenderState, InstanceCullingManager);
+		//		//}
+		//	});
+		//}
 	}
 
 	FScreenPassRenderTarget Output = Inputs.OverrideOutput;

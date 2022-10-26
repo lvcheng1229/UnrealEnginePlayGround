@@ -1349,6 +1349,7 @@ bool FBasePassMeshProcessor::Process(
 		TBasePassVertexShaderPolicyParamType<LightMapPolicyType>,
 		TBasePassPixelShaderPolicyParamType<LightMapPolicyType>> BasePassShaders;
 
+	
 	if (!GetBasePassShaders<LightMapPolicyType>(
 		MaterialResource,
 		VertexFactory->GetType(),

@@ -10,6 +10,9 @@
 #include "MobileBasePassRendering.h"
 #include "MeshPassProcessor.inl"
 
+//TanGram
+#include "TanGram/TanGramBasePassRendering.h"
+
 FEditorPrimitivesBasePassMeshProcessor::FEditorPrimitivesBasePassMeshProcessor(const FScene* Scene, ERHIFeatureLevel::Type InFeatureLevel, const FSceneView* InViewIfDynamicMeshCommand, const FMeshPassProcessorRenderState& InDrawRenderState, bool bInTranslucentBasePass, FMeshPassDrawListContext* InDrawListContext) 
 	: FMeshPassProcessor(Scene, InFeatureLevel, InViewIfDynamicMeshCommand, InDrawListContext)
 	, PassDrawRenderState(InDrawRenderState)
@@ -121,22 +124,15 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessDeferredShadingPath(const FM
 
 bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMeshBatch& MeshBatch, uint64 BatchElementMask, const FMaterial& Material, const FMaterialRenderProxy& MaterialRenderProxy, const FPrimitiveSceneProxy* PrimitiveSceneProxy, int32 StaticMeshId)
 {
-	FUniformLightMapPolicy NoLightmapPolicy(LMP_NO_LIGHTMAP);
-	typedef FUniformLightMapPolicy LightMapPolicyType;
-
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	const int32 NumMovablePointLights = 0;
-	const bool bEnableSkyLight = false;
 
-	TMeshProcessorShaders<
-		TMobileBasePassVSPolicyParamType<FUniformLightMapPolicy>,
-		TMobileBasePassPSPolicyParamType<FUniformLightMapPolicy>> BasePassShaders;
-	if (!MobileBasePass::GetShaders(
-		NoLightmapPolicy.GetIndirectPolicy(),
+	TMeshProcessorShaders<TTanGramBasePassVSPolicyParamType<FTanGramUniformLightMapPolicy>, TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>> BasePassShaders;
+
+	if (!TanGram::GetShaders(
 		NumMovablePointLights,
 		Material,
-		VertexFactory->GetType(),
-		bEnableSkyLight,
+		MeshBatch.VertexFactory->GetType(),
 		BasePassShaders.VertexShader,
 		BasePassShaders.PixelShader))
 	{
@@ -145,16 +141,11 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMes
 	
 	FMeshPassProcessorRenderState DrawRenderState(PassDrawRenderState);
 
-	if (bTranslucentBasePass)
-	{
-		MobileBasePass::SetTranslucentRenderState(DrawRenderState, Material);
-	}
-
 	const FMeshDrawingPolicyOverrideSettings OverrideSettings = ComputeMeshOverrideSettings(MeshBatch);
 	ERasterizerFillMode MeshFillMode = ComputeMeshFillMode(MeshBatch, Material, OverrideSettings);
 	ERasterizerCullMode MeshCullMode = ComputeMeshCullMode(MeshBatch, Material, OverrideSettings);
-	
-	TMobileBasePassShaderElementData<LightMapPolicyType> ShaderElementData(nullptr, false);
+
+	TTanGramBasePassShaderElementData<FTanGramUniformLightMapPolicy> ShaderElementData(nullptr, false);
 	ShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
 
 	const FMeshDrawCommandSortKey SortKey = CalculateMeshStaticSortKey(BasePassShaders.VertexShader, BasePassShaders.PixelShader);
@@ -174,4 +165,58 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMes
 		ShaderElementData);
 
 	return true;
+	
+	//FUniformLightMapPolicy NoLightmapPolicy(LMP_NO_LIGHTMAP);
+	//typedef FUniformLightMapPolicy LightMapPolicyType;
+//
+	//const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
+	//const int32 NumMovablePointLights = 0;
+	//const bool bEnableSkyLight = false;
+//
+	//TMeshProcessorShaders<
+	//	TMobileBasePassVSPolicyParamType<FUniformLightMapPolicy>,
+	//	TMobileBasePassPSPolicyParamType<FUniformLightMapPolicy>> BasePassShaders;
+	//if (!MobileBasePass::GetShaders(
+	//	NoLightmapPolicy.GetIndirectPolicy(),
+	//	NumMovablePointLights,
+	//	Material,
+	//	VertexFactory->GetType(),
+	//	bEnableSkyLight,
+	//	BasePassShaders.VertexShader,
+	//	BasePassShaders.PixelShader))
+	//{
+	//	return false;
+	//}
+	//
+	//FMeshPassProcessorRenderState DrawRenderState(PassDrawRenderState);
+//
+	//if (bTranslucentBasePass)
+	//{
+	//	MobileBasePass::SetTranslucentRenderState(DrawRenderState, Material);
+	//}
+//
+	//const FMeshDrawingPolicyOverrideSettings OverrideSettings = ComputeMeshOverrideSettings(MeshBatch);
+	//ERasterizerFillMode MeshFillMode = ComputeMeshFillMode(MeshBatch, Material, OverrideSettings);
+	//ERasterizerCullMode MeshCullMode = ComputeMeshCullMode(MeshBatch, Material, OverrideSettings);
+	//
+	//TMobileBasePassShaderElementData<LightMapPolicyType> ShaderElementData(nullptr, false);
+	//ShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
+//
+	//const FMeshDrawCommandSortKey SortKey = CalculateMeshStaticSortKey(BasePassShaders.VertexShader, BasePassShaders.PixelShader);
+//
+	//BuildMeshDrawCommands(
+	//	MeshBatch,
+	//	BatchElementMask,
+	//	PrimitiveSceneProxy,
+	//	MaterialRenderProxy,
+	//	Material,
+	//	DrawRenderState,
+	//	BasePassShaders,
+	//	MeshFillMode,
+	//	MeshCullMode,
+	//	SortKey,
+	//	EMeshPassFeatures::Default,
+	//	ShaderElementData);
+//
+	//return true;
 }

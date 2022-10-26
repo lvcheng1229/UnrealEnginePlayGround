@@ -18,7 +18,7 @@ SystemTextures
 
 RDG_REGISTER_BLACKBOARD_STRUCT(FRDGSystemTextures);
 
-PRAGMA_DISABLE_OPTIMIZATION
+//PRAGMA_DISABLE_OPTIMIZATION
 
 const FRDGSystemTextures& FRDGSystemTextures::Create(FRDGBuilder& GraphBuilder)
 {

@@ -70,6 +70,7 @@ static TAutoConsoleVariable<int32> CVarMobileUseHWsRGBEncoding(
 
 namespace MobileBasePass
 {
+
 	FShaderPlatformCachedIniValue<int32> MobileNumDynamicPointLightsIniValue(TEXT("r.MobileNumDynamicPointLights"));
 };
 

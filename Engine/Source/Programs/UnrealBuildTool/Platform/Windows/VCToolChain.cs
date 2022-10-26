@@ -1141,6 +1141,12 @@ namespace UnrealBuildTool
 			VCCompileAction BaseCompileAction = new VCCompileAction(EnvVars);
 			AppendCLArguments_Global(CompileEnvironment, BaseCompileAction.Arguments);
 
+			//TanGram
+			if(ModuleName == "Renderer")
+            {
+				//BaseCompileAction.Arguments.Add("/P");
+			}
+
 			// Add include paths to the argument list.
 			BaseCompileAction.IncludePaths.AddRange(CompileEnvironment.UserIncludePaths);
 			BaseCompileAction.SystemIncludePaths.AddRange(CompileEnvironment.SystemIncludePaths);
