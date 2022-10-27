@@ -315,6 +315,7 @@ void FXMobileSceneRenderer::Render(FRDGBuilder& GraphBuilder)
 	FRDGTextureRef ViewFamilyTexture = TryCreateViewFamilyTexture(GraphBuilder, ViewFamily);
 	RenderForward(GraphBuilder, ViewFamilyTexture, SceneTextures);
 
+	if (ViewFamily.bResolveScene)
 	{
 		RDG_EVENT_SCOPE(GraphBuilder, "PostProcessing");
 		SCOPE_CYCLE_COUNTER(STAT_FinishRenderViewTargetTime);

@@ -96,6 +96,8 @@ bool TTanGramBasePassPSPolicyParamType<LightMapPolicyType>::ModifyCompilationEnv
 	return true;
 }
 
-typedef TTanGramBasePassPS< TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP> , 0> TMobileBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64;
-IMPLEMENT_MATERIAL_SHADER_TYPE(template<>, TMobileBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64, TEXT("/Engine/Private/MobileBasePassPixelShader.usf"), TEXT("Main"), SF_Pixel);
+typedef TTanGramBasePassPS< TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP> , 0> TTanGramBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64;
+IMPLEMENT_MATERIAL_SHADER_TYPE(template<>, TTanGramBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64, TEXT("/Engine/Private/TanGram/TanGramBasePassPixelShader.usf"), TEXT("Main"), SF_Pixel);
 
+typedef TTanGramBasePassPS< TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP> , INT32_MAX> TTanGramBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64_MAXPOINT;
+IMPLEMENT_MATERIAL_SHADER_TYPE(template<>, TTanGramBasePassPS_TG_LMP_NO_LIGHT_MAP_HDRLinear64_MAXPOINT, TEXT("/Engine/Private/TanGram/TanGramBasePassPixelShader.usf"), TEXT("Main"), SF_Pixel);

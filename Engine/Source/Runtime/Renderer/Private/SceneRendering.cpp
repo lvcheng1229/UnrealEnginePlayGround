@@ -3682,7 +3682,7 @@ void RENDERER_API SetMultiViewFamilyOrigins(const TArray<FVector>& ViewOrigins)
 #endif
 }
 
-PRAGMA_DISABLE_OPTIMIZATION
+//PRAGMA_DISABLE_OPTIMIZATION
 
 FSceneRenderer* FSceneRenderer::CreateSceneRenderer(const FSceneViewFamily* InViewFamily, FHitProxyConsumer* HitProxyConsumer)
 {

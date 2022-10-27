@@ -1,0 +1,22 @@
+#include "../Common.ush"
+//#include "../SHCommon.ush"
+#include "/Engine/Generated/Material.ush"
+#include "../MobileBasePassCommon.ush"
+#include "/Engine/Generated/VertexFactory.ush"
+//#include "../ReflectionEnvironmentShared.ush"
+//#include "../LightmapCommon.ush"  
+//#include "../MobileShadingModels.ush"
+//#include "../DynamicLightingCommon.ush"
+//#include "../PlanarReflectionShared.ush"
+//#include "../ShadingModelsMaterial.ush"
+
+void Main(
+	FVertexFactoryInterpolantsVSToPS Interpolants
+	,  FSharedMobileBasePassInterpolants  BasePassInterpolants
+	, in float4 SvPosition : SV_Position
+	, in bool bIsFrontFace : SV_IsFrontFace
+	, out  half4  OutColor : SV_Target0
+	)
+    {
+		OutColor = half4(1.0,0.0,0.0,1.0);
+    }

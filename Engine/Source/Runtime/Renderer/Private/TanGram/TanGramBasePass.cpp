@@ -10,7 +10,6 @@
 #include "MeshPassProcessor.inl"
 #include "Engine/TextureCube.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
 
 //Temp
 static bool UseSkyReflectionCapture(const FScene* RenderScene)
@@ -171,8 +170,6 @@ void TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>::GetShader
 	}
 }
 
-//TanGram
-//PRAGMA_DISABLE_OPTIMIZATION
 
 const FLightSceneInfo* TanGram::GetDirectionalLightInfo(const FScene* Scene, const FPrimitiveSceneProxy* PrimitiveSceneProxy)
 {
@@ -193,13 +190,13 @@ bool GetUniformTanGramBasePassShaders(
 	TShaderRef<TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>>& PixelShader
 )
 {
-	using FVertexShaderType = TMobileBasePassVSPolicyParamType<FUniformLightMapPolicy>;
-	using FPixelShaderType = TMobileBasePassPSPolicyParamType<FUniformLightMapPolicy>;
+	//using FVertexShaderType = TMobileBasePassVSPolicyParamType<FUniformLightMapPolicy>;
+	//using FPixelShaderType = TMobileBasePassPSPolicyParamType<FUniformLightMapPolicy>;
 
 	FMaterialShaderTypes ShaderTypes;
 	ensure(IsMobileHDR());
-	ShaderTypes.AddShaderType<TMobileBasePassVS<TUniformLightMapPolicy<LMP_NO_LIGHTMAP>, HDR_LINEAR_64>>();
-	ShaderTypes.AddShaderType<TMobileBasePassPS<TUniformLightMapPolicy<LMP_NO_LIGHTMAP>, HDR_LINEAR_64, false, NumMovablePointLights>>();
+	ShaderTypes.AddShaderType<TTanGramBasePassVS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>>>();
+	ShaderTypes.AddShaderType<TTanGramBasePassPS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>,NumMovablePointLights>>();
 
 	FMaterialShaders Shaders;
 	if (!Material.TryGetShaders(ShaderTypes, VertexFactoryType, Shaders))
