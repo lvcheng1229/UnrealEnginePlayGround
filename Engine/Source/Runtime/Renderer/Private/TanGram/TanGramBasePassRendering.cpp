@@ -64,7 +64,7 @@ TTanGramBasePassVS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_
 (
 	TTanGramBasePassVS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>>::StaticGetTypeLayout(),
 	L"TTanGramBasePassVS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>>",
-	L"/Engine/Private/MobileBasePassVertexShader.usf",
+	L"/Engine/Private/TanGram/TanGramBasePassVertexShader.usf",
 	L"Main",
 	SF_Vertex,
 	TTanGramBasePassVS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>>::FPermutationDomain::PermutationCount,

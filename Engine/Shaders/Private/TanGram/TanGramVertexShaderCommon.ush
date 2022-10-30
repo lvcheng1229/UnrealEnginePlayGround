@@ -1,0 +1,45 @@
+//TanGram TanGramVertexShaderCommon.ush
+
+#include "/Engine/Generated/Material.ush"
+#include "/Engine/Generated/VertexFactory.ush"
+
+struct FTanGramVertexShaderInputData
+{
+	//float4 TangentToWorld0;
+	//float4 TangentToWorld2;
+	float4 WorldPositionWithoutWPO;
+	float4 WorldPositionWithWPO;
+	float3 WorldPositionOffset;
+	float4x4 TranslatedWorldToClip;
+};
+
+FTanGramVertexShaderInputData ResolveVertexShaderInputData(FVertexFactoryInput Input)
+{
+	FTanGramVertexShaderInputData RetTanGramVertexShaderInputData = (FTanGramVertexShaderInputData)0;
+	ResolvedView = GetPrimaryView();
+	FVertexFactoryIntermediates VFIntermediates = GetVertexFactoryIntermediates(Input);
+
+	//Compute World Position Without WPO
+	RetTanGramVertexShaderInputData.WorldPositionWithoutWPO = VertexFactoryGetWorldPosition(Input, VFIntermediates);
+
+	//Compute WorldPositionOffset
+	half3x3 TangentToLocal = VertexFactoryGetTangentToLocal(Input, VFIntermediates);
+	FMaterialVertexParameters VertexParameters = GetMaterialVertexParameters(Input, VFIntermediates, RetTanGramVertexShaderInputData.WorldPositionWithoutWPO.xyz, TangentToLocal);
+	RetTanGramVertexShaderInputData.WorldPositionOffset = GetMaterialWorldPositionOffset(VertexParameters);;
+	RetTanGramVertexShaderInputData.WorldPositionWithWPO = float4(RetTanGramVertexShaderInputData.WorldPositionWithoutWPO.xyz + RetTanGramVertexShaderInputData.WorldPositionOffset.xyz , RetTanGramVertexShaderInputData.WorldPositionWithoutWPO.w);
+
+	//Compute 
+	//float4 RasterizedWorldPosition = VertexFactoryGetRasterizedWorldPosition(Input, VFIntermediates, WorldPosition);
+	//Position = mul(RasterizedWorldPosition, ResolvedView.TranslatedWorldToClip);
+
+	//Compute TangentToWorld
+	//FVertexFactoryInterpolantsVSToPS VertexFactoryInterpolantsVSToPS = VertexFactoryGetInterpolantsVSToPS (Input, VFIntermediates, VertexParameters);
+	//RetTanGramVertexShaderInputData.TangentToWorld0 = VertexFactoryInterpolantsVSToPS.TangentToWorld0;
+	//RetTanGramVertexShaderInputData.TangentToWorld0 = VertexFactoryInterpolantsVSToPS.TangentToWorld0;
+	//RetTanGramVertexShaderInputData.TangentToWorld2 = VertexFactoryInterpolantsVSToPS.TangentToWorld2;
+	//RetTanGramVertexShaderInputData.TangentToWorld2 = VertexFactoryInterpolantsVSToPS.TangentToWorld2;
+
+	RetTanGramVertexShaderInputData.TranslatedWorldToClip = ResolvedView.TranslatedWorldToClip;
+	
+	return RetTanGramVertexShaderInputData;
+}

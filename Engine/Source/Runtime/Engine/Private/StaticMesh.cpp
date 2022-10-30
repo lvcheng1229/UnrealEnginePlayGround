@@ -15,6 +15,10 @@
 #include "RenderingThread.h"
 #include "VertexFactory.h"
 #include "LocalVertexFactory.h"
+
+//TanGram
+#include "TanGramVertexFactory.h"
+
 #include "RawIndexBuffer.h"
 #include "Engine/TextureStreamingTypes.h"
 #include "Components/StaticMeshComponent.h"
@@ -964,6 +968,35 @@ void FStaticMeshVertexFactories::InitResources(const FStaticMeshLODResources& Lo
 
 	InitVertexFactory(LodResources, VertexFactoryOverrideColorVertexBuffer, LODIndex, Parent, true);
 	BeginInitResource(&VertexFactoryOverrideColorVertexBuffer);
+
+	//TanGram : use TanGram VertexFactory
+
+	struct InitStaticMeshVertexFactoryParams
+	{
+		FTanGramVertexFactory* VertexFactory;
+		const FStaticMeshLODResources* LODResources;
+	}Params;
+
+	Params.VertexFactory = &TanGramVertexFactory;
+	Params.LODResources = &LodResources;
+	
+	ENQUEUE_RENDER_COMMAND(InitStaticMeshTanGramVertexFactory)(
+		[Params](FRHICommandListImmediate& RHICmdList)
+		{
+			FStaticMeshDataType OutData;
+
+			//Set position by lod resources
+			Params.LODResources->VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer(Params.VertexFactory, OutData);
+
+			//Set tangent by lod resources
+			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer(Params.VertexFactory, OutData);
+			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer(Params.VertexFactory, OutData);
+
+			//set vertex factory and init resource
+			Params.VertexFactory->SetData(OutData);
+			Params.VertexFactory->InitResource();
+	
+		});
 }
 
 void FStaticMeshVertexFactories::ReleaseResources()
@@ -972,6 +1005,9 @@ void FStaticMeshVertexFactories::ReleaseResources()
 	BeginReleaseResource(&VertexFactory);
 	BeginReleaseResource(&VertexFactoryOverrideColorVertexBuffer);
 
+	//TanGram
+	BeginReleaseResource(&TanGramVertexFactory);
+	
 	if (SplineVertexFactory)
 	{
 		BeginReleaseResource(SplineVertexFactory);		

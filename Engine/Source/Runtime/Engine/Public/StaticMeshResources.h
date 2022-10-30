@@ -37,6 +37,9 @@
 #include "WeightedRandomSampler.h"
 #include "PerPlatformProperties.h"
 
+//TanGram
+#include "TanGramVertexFactory.h"
+
 class FDistanceFieldVolumeData;
 class UBodySetup;
 
@@ -574,6 +577,7 @@ struct ENGINE_API FStaticMeshVertexFactories
 	FStaticMeshVertexFactories(ERHIFeatureLevel::Type InFeatureLevel)
 		: VertexFactory(InFeatureLevel, "FStaticMeshVertexFactories")
 		, VertexFactoryOverrideColorVertexBuffer(InFeatureLevel, "FStaticMeshVertexFactories_Override")
+		, TanGramVertexFactory(InFeatureLevel, "FTanGramVertexFactory")
 		, SplineVertexFactory(nullptr)
 		, SplineVertexFactoryOverrideColorVertexBuffer(nullptr)
 	{
@@ -588,6 +592,9 @@ struct ENGINE_API FStaticMeshVertexFactories
 
 	/** The vertex factory used when rendering this mesh with vertex colors. This is lazy init.*/
 	FLocalVertexFactory VertexFactoryOverrideColorVertexBuffer;
+
+	//TanGram : used for tangram vertex facory
+	FTanGramVertexFactory TanGramVertexFactory;
 
 	struct FSplineMeshVertexFactory* SplineVertexFactory;
 

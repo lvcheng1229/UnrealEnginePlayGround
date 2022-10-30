@@ -10,6 +10,10 @@
 #include "MeshPassProcessor.inl"
 #include "Engine/TextureCube.h"
 
+//shawnshtang
+//TanGram
+
+PRAGMA_DISABLE_OPTIMIZATION
 
 //Temp
 static bool UseSkyReflectionCapture(const FScene* RenderScene)

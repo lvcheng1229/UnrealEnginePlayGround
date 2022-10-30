@@ -1,0 +1,54 @@
+//TanGram TanGramBasePassVertexShader.usf
+#include "TanGramVertexShaderCommon.ush"
+
+//struct FVertexFactoryInput
+//{
+//	float4 Position : ATTRIBUTE0;
+//	half3  TangentX : ATTRIBUTE1;
+//	half4  TangentZ : ATTRIBUTE2;
+//	half4  Color : ATTRIBUTE3;
+//	float2 TexCoords0 : ATTRIBUTE4;
+//};
+
+
+
+//static ViewState ResolvedView = (ViewState)0.0f;
+
+
+//MVP Clip 
+
+void Main(
+	FVertexFactoryInput Input
+
+	//,out float4 TangentToWorld0 : TEXCOORD10
+	//,out float4	TangentToWorld2	: TEXCOORD11
+	,out float4	TexCoords[1]: TEXCOORD0
+
+	,out float4 PixelPosition	: TEXCOORD8 // xyz = world position, w = clip z
+
+	,out float4 Position : SV_Position
+	)
+{
+	FTanGramVertexShaderInputData TanGramVertexShaderInputData = ResolveVertexShaderInputData(Input);
+	//TangentToWorld0 = TanGramVertexShaderInputData.TangentToWorld0;
+	//TangentToWorld2 = TanGramVertexShaderInputData.TangentToWorld2;
+	TexCoords[0] = float4(0,0,0,0);
+	
+	//float TangentSign = Input.TangentZ.w;
+	//TangentToWorld0 = float4(Input.TangentX,0);
+	//TangentToWorld2 = float4(Input.TangentZ.xyz,TangentSign);
+	//TexCoords[0] = float4(Input.TexCoords0,0.0,0.0);
+	
+	//ResolvedView = GetPrimaryView();;
+	//FVertexFactoryIntermediates VFIntermediates = GetVertexFactoryIntermediates(Input);
+	//float4 WorldPositionExcludingWPO = VertexFactoryGetWorldPosition(Input, VFIntermediates);
+	//float4 WorldPosition = WorldPositionExcludingWPO;
+	//half3x3 TangentToLocal = VertexFactoryGetTangentToLocal(Input, VFIntermediates);
+	//FMaterialVertexParameters VertexParameters = GetMaterialVertexParameters(Input, VFIntermediates, WorldPosition.xyz, TangentToLocal);
+	//half3 WorldPositionOffset = GetMaterialWorldPositionOffset(VertexParameters);
+	//WorldPosition.xyz += WorldPositionOffset;
+	//float4 RasterizedWorldPosition = VertexFactoryGetRasterizedWorldPosition(Input, VFIntermediates, WorldPositionWithOffset);
+
+	Position = mul(TanGramVertexShaderInputData.WorldPositionWithWPO, TanGramVertexShaderInputData.TranslatedWorldToClip);
+	PixelPosition = float4(TanGramVertexShaderInputData.WorldPositionWithWPO.xyz , Position.w);
+}
