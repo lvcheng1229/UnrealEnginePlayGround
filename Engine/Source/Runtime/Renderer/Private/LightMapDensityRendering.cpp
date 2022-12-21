@@ -114,6 +114,7 @@ bool FLightmapDensityMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	FVertexFactoryType* VertexFactoryType = VertexFactory->GetType();
 
@@ -229,7 +230,9 @@ bool FLightmapDensityMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 

@@ -1050,7 +1050,11 @@ void FNiagaraRendererMeshes::CreateMeshBatchForSection(
 	bool bNeedsPrevTransform
 ) const
 {
+#if !ENABLE_TANGRAM
 	MeshBatch.VertexFactory = &VertexFactory;
+#else
+	ensure(false);
+#endif
 	MeshBatch.LCI = NULL;
 	MeshBatch.ReverseCulling = SceneProxy.IsLocalToWorldDeterminantNegative();
 	MeshBatch.CastShadow = SceneProxy.CastsDynamicShadow();
@@ -1471,8 +1475,12 @@ void FNiagaraRendererMeshes::GetDynamicRayTracingInstances(FRayTracingMaterialGa
 #endif
 
 			MeshBatch.bCanApplyViewModeOverrides = false;
-
+#if !ENABLE_TANGRAM
 			MeshBatch.Elements[0].VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
+#else
+			ensure(false);
+#endif
+
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 			MeshBatch.Elements[0].VisualizeElementIndex = SectionIndex;
 #endif

@@ -127,6 +127,7 @@ public:
 			bool bUseSkyMaterial = Material.IsSky();
 			bool bUseSingleLayerWaterMaterial = Material.GetShadingModels().HasShadingModel(MSM_SingleLayerWater);
 			bool bUseAnisotropy = Material.GetShadingModels().HasAnyShadingModel({MSM_DefaultLit, MSM_ClearCoat}) && Material.MaterialUsesAnisotropy_RenderThread();
+#if !ENABLE_TANGRAM
 			bool bSupportsNaniteRendering = SupportsNaniteRendering(StaticMesh->VertexFactory, PrimitiveSceneProxy, Mesh.MaterialRenderProxy, FeatureLevel);
 			bool bSupportsGPUScene = StaticMesh->VertexFactory->SupportsGPUScene(FeatureLevel);
 
@@ -141,6 +142,9 @@ public:
 				bSupportsGPUScene,
 				FeatureLevel
 				);
+#else
+			ensure(false);
+#endif
 		}
 	}
 

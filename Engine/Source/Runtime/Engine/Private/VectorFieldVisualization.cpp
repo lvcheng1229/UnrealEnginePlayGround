@@ -255,7 +255,11 @@ void GetVectorFieldMesh(
 		FMeshBatch& MeshBatch = Collector.AllocateMesh();
 		MeshBatch.CastShadow = false;
 		MeshBatch.bUseAsOccluder = false;
+#if !ENABLE_TANGRAM
 		MeshBatch.VertexFactory = VertexFactory;
+#else
+		ensure(false);
+#endif
 		MeshBatch.MaterialRenderProxy = VisualizationMaterial;
 		MeshBatch.Type = PT_LineList;
 

@@ -13,6 +13,10 @@
 #include "EngineDefines.h"
 #include "GPUSceneWriter.h"
 
+//TanGram BEGIN
+#include "TanGramVertexAttribute.h"
+//TanGram END
+
 #define USE_MESH_BATCH_VALIDATION !UE_BUILD_SHIPPING
 
 class FLightCacheInterface;
@@ -279,9 +283,13 @@ struct FMeshBatch
 {
 	TArray<FMeshBatchElement,TInlineAllocator<1> > Elements;
 
+#if !ENABLE_TANGRAM
 	/** Vertex factory for rendering, required. */
 	const FVertexFactory* VertexFactory;
-
+#else
+	const FTanGramVertexAttribute* TanGramVertexAttribute;
+#endif
+	
 	/** Material proxy for rendering, required. */
 	const FMaterialRenderProxy* MaterialRenderProxy;
 
@@ -431,7 +439,12 @@ struct FMeshBatch
 
 	/** Default constructor. */
 	FMeshBatch()
-	:	VertexFactory(nullptr)
+	:
+#if !ENABLE_TANGRAM
+	VertexFactory(nullptr)
+#else
+	TanGramVertexAttribute(nullptr)
+#endif
 	,	MaterialRenderProxy(nullptr)
 	,	LCI(nullptr)
 	,	TessellationDisablingShadowMapMeshSize(0.0f)

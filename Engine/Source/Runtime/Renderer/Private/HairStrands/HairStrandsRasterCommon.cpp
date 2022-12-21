@@ -232,6 +232,7 @@ bool FHairRasterMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	static const FVertexFactoryType* CompatibleVF = FVertexFactoryType::GetVFByName(TEXT("FHairStrandsVertexFactory"));
 
@@ -276,7 +277,9 @@ bool FHairRasterMeshProcessor::Process(
 		FMeshDrawCommandSortKey::Default,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 

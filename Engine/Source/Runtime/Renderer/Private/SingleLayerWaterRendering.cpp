@@ -860,7 +860,7 @@ bool FSingleLayerWaterPassMeshProcessor::Process(
 	TMeshProcessorShaders<
 		TBasePassVertexShaderPolicyParamType<LightMapPolicyType>,
 		TBasePassPixelShaderPolicyParamType<LightMapPolicyType>> WaterPassShaders;
-
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	const bool bRenderSkylight = true;
 	if (!GetBasePassShaders<LightMapPolicyType>(
@@ -895,7 +895,9 @@ bool FSingleLayerWaterPassMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 

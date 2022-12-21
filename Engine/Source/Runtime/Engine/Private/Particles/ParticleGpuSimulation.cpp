@@ -3010,7 +3010,11 @@ public:
 					BatchElement.NumInstances = ParticleCount / MAX_PARTICLES_PER_INSTANCE;
 					BatchElement.FirstIndex = 0;
 					BatchElement.UserData = MeshBatchUserData;
+#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
+#else
+					ensure(false);
+#endif
 					Mesh.LCI = NULL;
 					if ( bUseLocalSpace )
 					{

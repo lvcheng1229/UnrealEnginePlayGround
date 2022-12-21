@@ -78,8 +78,12 @@ bool FSplineMeshSceneProxy::GetShadowMeshElement(int32 LODIndex, int32 BatchInde
 	{
 		const FStaticMeshVertexFactories& VFs = RenderData->LODVertexFactories[LODIndex];
 		check(OutMeshBatch.Elements.Num() == 1);
+#if !ENABLE_TANGRAM	
 		OutMeshBatch.VertexFactory = OutMeshBatch.Elements[0].bUserDataIsColorVertexBuffer ? VFs.SplineVertexFactoryOverrideColorVertexBuffer : VFs.SplineVertexFactory;
 		check(OutMeshBatch.VertexFactory);
+#else
+		ensure(false);
+#endif
 		OutMeshBatch.Elements[0].SplineMeshSceneProxy = const_cast<FSplineMeshSceneProxy*>(this);
 		OutMeshBatch.Elements[0].bIsSplineProxy = true;
 		OutMeshBatch.Elements[0].PrimitiveUniformBuffer = GetUniformBuffer();
@@ -97,8 +101,12 @@ bool FSplineMeshSceneProxy::GetMeshElement(int32 LODIndex, int32 BatchIndex, int
 	{
 		const FStaticMeshVertexFactories& VFs = RenderData->LODVertexFactories[LODIndex];
 		check(OutMeshBatch.Elements.Num() == 1);
+#if !ENABLE_TANGRAM	
 		OutMeshBatch.VertexFactory = OutMeshBatch.Elements[0].bUserDataIsColorVertexBuffer ? VFs.SplineVertexFactoryOverrideColorVertexBuffer : VFs.SplineVertexFactory;
 		check(OutMeshBatch.VertexFactory);
+#else
+		ensure(false);
+#endif
 		OutMeshBatch.Elements[0].SplineMeshSceneProxy = const_cast<FSplineMeshSceneProxy*>(this);
 		OutMeshBatch.Elements[0].bIsSplineProxy = true;
 		OutMeshBatch.Elements[0].PrimitiveUniformBuffer = GetUniformBuffer();
@@ -116,8 +124,12 @@ bool FSplineMeshSceneProxy::GetWireframeMeshElement(int32 LODIndex, int32 BatchI
 	{
 		const FStaticMeshVertexFactories& VFs = RenderData->LODVertexFactories[LODIndex];
 		check(OutMeshBatch.Elements.Num() == 1);
+#if !ENABLE_TANGRAM	
 		OutMeshBatch.VertexFactory = OutMeshBatch.Elements[0].bUserDataIsColorVertexBuffer ? VFs.SplineVertexFactoryOverrideColorVertexBuffer : VFs.SplineVertexFactory;
 		check(OutMeshBatch.VertexFactory);
+#else
+		ensure(false);
+#endif
 		OutMeshBatch.Elements[0].SplineMeshSceneProxy = const_cast<FSplineMeshSceneProxy*>(this);
 		OutMeshBatch.Elements[0].bIsSplineProxy = true;
 		OutMeshBatch.Elements[0].PrimitiveUniformBuffer = GetUniformBuffer();

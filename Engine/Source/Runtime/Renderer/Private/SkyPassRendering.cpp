@@ -62,6 +62,7 @@ bool FSkyPassMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
+#if !ENABLE_TANGRAM
 	typedef FUniformLightMapPolicy LightMapPolicyType;
 	FUniformLightMapPolicy NoLightmapPolicy(LMP_NO_LIGHTMAP);
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
@@ -153,7 +154,9 @@ bool FSkyPassMeshProcessor::Process(
 			EMeshPassFeatures::Default,
 			ShaderElementData);
 	}
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 

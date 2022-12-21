@@ -472,7 +472,12 @@ bool FPaperRenderSceneProxy::GetMeshElement(int32 SectionIndex, uint8 DepthPrior
 		OutMeshBatch.bUseWireframeSelectionColoring = bIsSelected;
 
 		OutMeshBatch.LODIndex = 0;
+#if !ENABLE_TANGRAM
 		OutMeshBatch.VertexFactory = &VertexFactory;
+#else
+		ensure(false);
+#endif
+		
 		OutMeshBatch.LCI = nullptr;
 		OutMeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative() ? true : false;
 		OutMeshBatch.CastShadow = bCastShadow;

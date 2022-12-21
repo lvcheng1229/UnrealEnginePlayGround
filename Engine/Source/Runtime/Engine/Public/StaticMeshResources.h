@@ -38,7 +38,7 @@
 #include "PerPlatformProperties.h"
 
 //TanGram
-#include "TanGramVertexFactory.h"
+#include "TanGramLocalVertexAttribute.h"
 
 class FDistanceFieldVolumeData;
 class UBodySetup;
@@ -575,9 +575,14 @@ private:
 struct ENGINE_API FStaticMeshVertexFactories
 {
 	FStaticMeshVertexFactories(ERHIFeatureLevel::Type InFeatureLevel)
-		: VertexFactory(InFeatureLevel, "FStaticMeshVertexFactories")
+		: 
+#if !ENABLE_TANGRAM
+		VertexFactory(InFeatureLevel, "FStaticMeshVertexFactories")
 		, VertexFactoryOverrideColorVertexBuffer(InFeatureLevel, "FStaticMeshVertexFactories_Override")
-		, TanGramVertexFactory(InFeatureLevel, "FTanGramVertexFactory")
+#else
+		TanGramLocalVertexAttribute(InFeatureLevel)
+		, TanGramLocalVertexAttributeOverrideColorVertexBuffer(InFeatureLevel)
+#endif
 		, SplineVertexFactory(nullptr)
 		, SplineVertexFactoryOverrideColorVertexBuffer(nullptr)
 	{
@@ -587,19 +592,23 @@ struct ENGINE_API FStaticMeshVertexFactories
 
 	~FStaticMeshVertexFactories();
 
+#if !ENABLE_TANGRAM
 	/** The vertex factory used when rendering this mesh. */
 	FLocalVertexFactory VertexFactory;
 
 	/** The vertex factory used when rendering this mesh with vertex colors. This is lazy init.*/
 	FLocalVertexFactory VertexFactoryOverrideColorVertexBuffer;
-
-	//TanGram : used for tangram vertex facory
-	FTanGramVertexFactory TanGramVertexFactory;
+#else
+	//TanGram
+	FTanGramLocalVertexAttribute TanGramLocalVertexAttribute;
+	FTanGramLocalVertexAttribute TanGramLocalVertexAttributeOverrideColorVertexBuffer;
+#endif
 
 	struct FSplineMeshVertexFactory* SplineVertexFactory;
 
 	struct FSplineMeshVertexFactory* SplineVertexFactoryOverrideColorVertexBuffer;
 
+#if !ENABLE_TANGRAM
 	/**
 	* Initializes a vertex factory for rendering this static mesh
 	*
@@ -608,7 +617,10 @@ struct ENGINE_API FStaticMeshVertexFactories
 	* @param	bInOverrideColorVertexBuffer	If true, make a vertex factory ready for per-instance colors
 	*/
 	void InitVertexFactory(const FStaticMeshLODResources& LodResources, FLocalVertexFactory& InOutVertexFactory, uint32 LODIndex, const UStaticMesh* InParentMesh, bool bInOverrideColorVertexBuffer);
-
+#else
+	//TanGram
+	void InitVertexFactory(const FStaticMeshLODResources& LodResources, FTanGramLocalVertexAttribute& InOutVertexFactory, uint32 LODIndex, const UStaticMesh* InParentMesh, bool bInOverrideColorVertexBuffer);
+#endif
 	/** Initializes all rendering resources. */
 	void InitResources(const FStaticMeshLODResources& LodResources, uint32 LODIndex, const UStaticMesh* Parent);
 

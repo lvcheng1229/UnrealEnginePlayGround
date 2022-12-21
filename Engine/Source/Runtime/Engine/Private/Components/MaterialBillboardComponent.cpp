@@ -211,8 +211,11 @@ public:
 
 							// Set up the FMeshElement.
 							FMeshBatch& Mesh = Collector.AllocateMesh();
-
+#if !ENABLE_TANGRAM
 							Mesh.VertexFactory = &VertexFactory;
+#else
+							ensure(false);
+#endif	
 							Mesh.MaterialRenderProxy = Element.Material->GetRenderProxy();
 							Mesh.LCI = NULL;
 							Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative() ? true : false;

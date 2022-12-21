@@ -985,7 +985,12 @@ void FDynamicSpriteEmitterData::GetDynamicMeshElementsEmitter(const FParticleSys
 			BatchElement.NumPrimitives = NumTrianglesPerParticle;
 			BatchElement.NumInstances = ParticleCount;
 			BatchElement.FirstIndex = 0;
+		
+#if !ENABLE_TANGRAM	
 			Mesh.VertexFactory = SpriteVertexFactory;
+#else
+			ensure(false);
+#endif
 			// if the particle rendering data is presupplied, use it directly
 			Mesh.LCI = NULL;
 			if (SourceData->bUseLocalSpace == true)
@@ -1510,7 +1515,12 @@ void FDynamicMeshEmitterData::GetDynamicMeshElementsEmitter(const FParticleSyste
 					TotalTriangles += Section.NumTriangles;
 
 					FMeshBatch& Mesh = Collector.AllocateMesh();
+#if !ENABLE_TANGRAM	
 					Mesh.VertexFactory = MeshVertexFactory;
+#else
+					ensure(false);
+#endif
+
 					Mesh.LCI = NULL;
 					Mesh.ReverseCulling = Proxy->IsLocalToWorldDeterminantNegative();
 					Mesh.CastShadow = Proxy->GetCastShadow();
@@ -2441,7 +2451,13 @@ void FDynamicBeam2EmitterData::GetDynamicMeshElementsEmitter(const FParticleSyst
 	FMeshBatchElement& BatchElement = Mesh.Elements[0];
 	BatchElement.IndexBuffer = IndexBuffer;
 	BatchElement.FirstIndex = FirstIndex;
+#if !ENABLE_TANGRAM	
 	Mesh.VertexFactory = BeamTrailVertexFactory;
+#else
+	ensure(false);
+#endif
+
+	
 	Mesh.LCI = NULL;
 	if (Source.bUseLocalSpace == true)
 	{
@@ -5196,7 +5212,11 @@ void FDynamicTrailsEmitterData::GetDynamicMeshElementsEmitter(const FParticleSys
 	FMeshBatchElement& BatchElement = Mesh.Elements[0];
 	BatchElement.IndexBuffer = IndexBuffer;
 	BatchElement.FirstIndex = FirstIndex;
+#if !ENABLE_TANGRAM	
 	Mesh.VertexFactory = BeamTrailVertexFactory;
+#else
+	ensure(false);
+#endif
 	Mesh.LCI = NULL;
 
 	BatchElement.PrimitiveUniformBuffer = Proxy->GetWorldSpacePrimitiveUniformBuffer();

@@ -214,6 +214,12 @@ namespace UnrealBuildTool
 		public bool bEnableRayTracing = false;
 
 		/// <summary>
+		/// Enables tangram support.
+		/// </summary>
+		[ConfigFile(ConfigHierarchyType.Engine, "/Script/WindowsTargetPlatform.WindowsTargetSettings", "bEnableTanGram")]
+		public bool bEnableTanGram = false;
+
+		/// <summary>
 		/// The name of the company (author, provider) that created the project.
 		/// </summary>
 		[ConfigFile(ConfigHierarchyType.Game, "/Script/EngineSettings.GeneralProjectSettings", "CompanyName")]
@@ -534,6 +540,11 @@ namespace UnrealBuildTool
 		public bool bEnableRayTracing
 		{
 			get { return Inner.bEnableRayTracing; }
+		}
+
+		public bool bEnableTanGram
+		{
+			get { return Inner.bEnableTanGram; }
 		}
 
 		public string? CompanyName
@@ -2152,6 +2163,11 @@ namespace UnrealBuildTool
 			if (Target.Platform == UnrealTargetPlatform.Win64 && Target.WindowsPlatform.bEnableRayTracing)
 			{
 				CompileEnvironment.Definitions.Add("RHI_RAYTRACING=1");
+			}
+
+			if (Target.Platform == UnrealTargetPlatform.Win64 && Target.WindowsPlatform.bEnableTanGram)
+			{
+				CompileEnvironment.Definitions.Add("ENABLE_TANGRAM=1");
 			}
 
 			// Explicitly exclude the MS C++ runtime libraries we're not using, to ensure other libraries we link with use the same

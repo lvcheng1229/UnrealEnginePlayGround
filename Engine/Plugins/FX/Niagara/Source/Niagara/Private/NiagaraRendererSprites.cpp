@@ -873,8 +873,11 @@ void FNiagaraRendererSprites::CreateMeshBatchForView(
 	}
 
 	VertexFactory.LooseParameterUniformBuffer = FNiagaraSpriteVFLooseParametersRef::CreateUniformBufferImmediate(VFLooseParams, UniformBuffer_SingleFrame);
-
+#if !ENABLE_TANGRAM
 	MeshBatch.VertexFactory = &VertexFactory;
+#else
+	ensure(false);
+#endif
 	MeshBatch.CastShadow = SceneProxy.CastsDynamicShadow();
 #if RHI_RAYTRACING
 	MeshBatch.CastRayTracedShadow = SceneProxy.CastsDynamicShadow();

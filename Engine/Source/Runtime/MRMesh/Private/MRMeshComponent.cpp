@@ -441,8 +441,11 @@ private:
 							Mesh.bWireframe = bUseWireframe;
 							Mesh.bUseAsOccluder = bEnableOcclusion;
 							Mesh.bUseForDepthPass = bEnableOcclusion;
-
+#if !ENABLE_TANGRAM
 							Mesh.VertexFactory = &Section->VertexFactory;
+#else
+							ensure(false);
+#endif
 							Mesh.MaterialRenderProxy = MaterialProxy;
 
 							FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();

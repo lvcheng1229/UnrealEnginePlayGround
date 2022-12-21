@@ -1533,7 +1533,7 @@ FMeshDrawCommandPrimitiveIdInfo FMeshPassProcessor::GetDrawCommandPrimitiveId(
 bool FMeshPassProcessor::ShouldSkipMeshDrawCommand(const FMeshBatch& RESTRICT MeshBatch, const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy) const
 {
 	bool bSkipMeshDrawCommand = false;
-
+#if !ENABLE_TANGRAM
 #if WITH_EDITORONLY_DATA
 	// Support debug mode to render only non-Nanite proxies that incorrectly reference coarse mesh static mesh assets.
 	if (GNaniteIsolateInvalidCoarseMesh != 0)
@@ -1553,7 +1553,9 @@ bool FMeshPassProcessor::ShouldSkipMeshDrawCommand(const FMeshBatch& RESTRICT Me
 		}
 	}
 #endif
-
+#else
+	ensure(false);
+#endif
 	return bSkipMeshDrawCommand;
 }
 

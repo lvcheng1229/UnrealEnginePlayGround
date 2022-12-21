@@ -720,7 +720,7 @@ bool FMobileBasePassMeshProcessor::Process(
 	{
 		NumMovablePointLights = MobileBasePass::CalcNumMovablePointLights(MaterialResource, PrimitiveSceneProxy);
 	}
-
+#if !ENABLE_TANGRAM
 	if (!MobileBasePass::GetShaders(
 		LightMapPolicyType,
 		NumMovablePointLights,
@@ -732,7 +732,9 @@ bool FMobileBasePassMeshProcessor::Process(
 	{
 		return false;
 	}
-
+#else
+	ensure(false);
+#endif
 	const bool bMaskedInEarlyPass = (MaterialResource.IsMasked() || MeshBatch.bDitheredLODTransition) && Scene && MaskedInEarlyPass(Scene->GetShaderPlatform());
 	const bool bForcePassDrawRenderState = ((Flags & EFlags::ForcePassDrawRenderState) == EFlags::ForcePassDrawRenderState);
 

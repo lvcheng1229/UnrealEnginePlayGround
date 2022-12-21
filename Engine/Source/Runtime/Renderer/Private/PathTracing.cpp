@@ -655,7 +655,13 @@ bool FRayTracingMeshProcessor::ProcessPathTracing(
 	const FMaterialRenderProxy& RESTRICT MaterialRenderProxy,
 	const FMaterial& RESTRICT MaterialResource)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
+#else
+	const FVertexFactory* VertexFactory = nullptr;
+	ensure(false);
+#endif
+
 
 	TMeshProcessorShaders<
 		FMeshMaterialShader,

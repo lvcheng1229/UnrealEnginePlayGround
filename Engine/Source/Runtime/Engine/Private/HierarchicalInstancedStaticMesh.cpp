@@ -1358,7 +1358,12 @@ void FHierarchicalStaticMeshSceneProxy::FillDynamicMeshElements(FMeshElementColl
 					MeshBatch.bUseSelectionOutline = ElementParams.BatchRenderSelection[SelectionGroupIndex];
 					MeshBatch.bUseWireframeSelectionColoring = ElementParams.BatchRenderSelection[SelectionGroupIndex];
 					MeshBatch.bUseAsOccluder = ShouldUseAsOccluder();
+#if !ENABLE_TANGRAM	
 					MeshBatch.VertexFactory = &InstancedRenderData.VertexFactories[LODIndex];
+#else
+					ensure(false);
+#endif
+
 
 					FMeshBatchElement& MeshBatchElement = MeshBatch.Elements[0];
 					MeshBatchElement.UserData = ElementParams.PassUserData[SelectionGroupIndex];
@@ -1440,8 +1445,12 @@ void FHierarchicalStaticMeshSceneProxy::FillDynamicMeshElements(FMeshElementColl
 							continue;
 						}
 						checkSlow(MeshElement.GetNumPrimitives() > 0);
-
+#if !ENABLE_TANGRAM	
 						MeshElement.VertexFactory = &InstancedRenderData.VertexFactories[LODIndex];
+#else
+						ensure(false);
+#endif
+
 						FMeshBatchElement& BatchElement0 = MeshElement.Elements[0];
 
 						BatchElement0.UserData = ElementParams.PassUserData[SelectionGroupIndex];

@@ -401,7 +401,12 @@ void FSceneProxyBase::DrawStaticElementsInternal(FStaticPrimitiveDrawInterface* 
 	LLM_SCOPE_BYTAG(Nanite);
 
 	FMeshBatch MeshBatch;
+#if !ENABLE_TANGRAM	
 	MeshBatch.VertexFactory = GVertexFactoryResource.GetVertexFactory();
+#else
+	ensure(false);
+#endif
+	
 	MeshBatch.Type = GRHISupportsRectTopology ? PT_RectList : PT_TriangleList;
 	MeshBatch.ReverseCulling = false;
 	MeshBatch.bDisableBackfaceCulling = true;
@@ -1198,7 +1203,11 @@ void FSceneProxy::SetupRayTracingMaterials(int32 LODIndex, TArray<FMeshBatch>& M
 	{
 		const FMaterialSection& MaterialSection = MaterialSections[SectionIndex];
 		FMeshBatch& MeshBatch = Materials[SectionIndex];
+#if !ENABLE_TANGRAM	
 		MeshBatch.VertexFactory = &RenderData->LODVertexFactories[LODIndex].VertexFactory;
+#else
+		ensure(false);
+#endif
 		MeshBatch.MaterialRenderProxy = MaterialSection.ShadingMaterialProxy;
 		MeshBatch.bWireframe = false;
 		MeshBatch.SegmentIndex = SectionIndex;

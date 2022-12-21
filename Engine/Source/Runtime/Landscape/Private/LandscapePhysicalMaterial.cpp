@@ -205,6 +205,7 @@ bool FLandscapePhysicalMaterialMeshProcessor::Process(
 	const FMaterialRenderProxy& RESTRICT MaterialRenderProxy,
 	const FMaterial& RESTRICT MaterialResource)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -246,7 +247,9 @@ bool FLandscapePhysicalMaterialMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 

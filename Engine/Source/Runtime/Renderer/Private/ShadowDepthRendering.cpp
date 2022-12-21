@@ -2114,6 +2114,7 @@ bool FShadowDepthPassMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -2184,7 +2185,9 @@ bool FShadowDepthPassMeshProcessor::Process(
 			bUsePositionOnlyVS ? EMeshPassFeatures::PositionAndNormalOnly : EMeshPassFeatures::Default,
 			ShaderElementData);
 	}
-
+#else
+	ensure(false);
+#endif
 	return true;
 }
 
@@ -2224,7 +2227,11 @@ bool FShadowDepthPassMeshProcessor::TryAddMeshBatch(const FMeshBatch& RESTRICT M
 	if (bShouldCastShadow
 		&& ShouldIncludeDomainInMeshPass(Material.GetMaterialDomain())
 		&& ShouldIncludeMaterialInDefaultOpaquePass(Material)
+#if !ENABLE_TANGRAM
 		&& EnumHasAnyFlags(MeshSelectionMask, MeshBatch.VertexFactory->SupportsGPUScene(FeatureLevel) ? EShadowMeshSelection::VSM : EShadowMeshSelection::SM))
+#else
+		&& ensure(false))
+#endif
 	{
 		const FMaterialRenderProxy* EffectiveMaterialRenderProxy = &MaterialRenderProxy;
 		const FMaterial* EffectiveMaterial = &Material;

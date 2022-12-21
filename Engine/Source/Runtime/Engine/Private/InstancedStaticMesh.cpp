@@ -1601,7 +1601,11 @@ void FInstancedStaticMeshSceneProxy::UpdateInstances_RenderThread(const FInstanc
 
 void FInstancedStaticMeshSceneProxy::SetupInstancedMeshBatch(int32 LODIndex, int32 BatchIndex, FMeshBatch& OutMeshBatch) const
 {
+#if !ENABLE_TANGRAM	
 	OutMeshBatch.VertexFactory = &InstancedRenderData.VertexFactories[LODIndex];
+#else
+	ensure(false);
+#endif
 	const uint32 NumInstances = InstancedRenderData.PerInstanceRenderData->InstanceBuffer.GetNumInstances();
 	FMeshBatchElement& BatchElement0 = OutMeshBatch.Elements[0];
 	BatchElement0.UserData = (void*)&UserData_AllInstances;
@@ -1779,9 +1783,11 @@ void FInstancedStaticMeshSceneProxy::GetDynamicRayTracingInstances(struct FRayTr
 			GetMeshElement(LOD, 0, SectionIdx, 0, false, false, DynamicMeshBatch);
 
 			FStaticMeshSceneProxy::GetMeshElement(LOD, 0, SectionIdx, 0, false, false, MeshBatch);
-
+#if !ENABLE_TANGRAM	
 			DynamicMeshBatch.VertexFactory = &InstancedRenderData.VertexFactories[LOD];
-
+#else
+			ensure(false);
+#endif
 			RayTracingWPOInstanceTemplate.Materials.Add(MeshBatch);
 			RayTracingWPODynamicTemplate.Materials.Add(DynamicMeshBatch);
 		}

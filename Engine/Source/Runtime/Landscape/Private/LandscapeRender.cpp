@@ -1442,7 +1442,11 @@ void FLandscapeComponentSceneProxy::CreateRenderThreadResources()
 		// Grass is being generated using LOD0 material only
 		// It uses the fixed grid vertex factory so it doesn't support XY offsets
 		FMaterialRenderProxy* RenderProxy = AvailableMaterials[LODIndexToMaterialIndex[0]]->GetRenderProxy();
+#if !ENABLE_TANGRAM
 		GrassMeshBatch.VertexFactory = FixedGridVertexFactory;
+#else
+		ensure(false);
+#endif
 		GrassMeshBatch.MaterialRenderProxy = RenderProxy;
 		GrassMeshBatch.LCI = nullptr;
 		GrassMeshBatch.ReverseCulling = false;
@@ -1914,8 +1918,11 @@ bool FLandscapeComponentSceneProxy::GetMeshElementForVirtualTexture(int32 InLodI
 	{
 		return false;
 	}
-
+#if !ENABLE_TANGRAM
 	OutMeshBatch.VertexFactory = FixedGridVertexFactory;
+#else
+	ensure(false);
+#endif
 	OutMeshBatch.MaterialRenderProxy = InMaterialInterface->GetRenderProxy();
 	OutMeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();
 	OutMeshBatch.CastShadow = false;
@@ -1991,6 +1998,7 @@ bool FLandscapeComponentSceneProxy::GetStaticMeshElement(int32 LODIndex, bool bF
 	}
 
 	{
+#if !ENABLE_TANGRAM
 		MeshBatch.VertexFactory = VertexFactory;
 		MeshBatch.MaterialRenderProxy = MaterialInterface->GetRenderProxy();
 
@@ -2026,6 +2034,9 @@ bool FLandscapeComponentSceneProxy::GetStaticMeshElement(int32 LODIndex, bool bF
 
 		// The default is overridden here only by mobile landscape to punch holes in the geometry
 		ApplyMeshElementModifier(BatchElement, LODIndex);
+#else
+		ensure(false);
+#endif
 	}
 
 	return true;
@@ -2500,7 +2511,11 @@ void FLandscapeComponentSceneProxy::GetDynamicRayTracingInstances(FRayTracingMat
 	}
 
 	FMeshBatch BaseMeshBatch;
+#if !ENABLE_TANGRAM
 	BaseMeshBatch.VertexFactory = VertexFactory;
+#else
+	ensure(false);
+#endif
 	BaseMeshBatch.MaterialRenderProxy = SelectedMaterial->GetRenderProxy();
 	BaseMeshBatch.LCI = ComponentLightInfo.Get();
 	BaseMeshBatch.CastShadow = true;

@@ -944,7 +944,11 @@ static void GetSingleTriangleMeshBatch(FMeshBatch& LocalSingleTriangleMesh, cons
 {
 	check(GSingleTriangleMeshVertexFactory && !GSingleTriangleMeshVertexFactory->HasIncompatibleFeatureLevel(FeatureLevel));
 
+#if !ENABLE_TANGRAM
 	LocalSingleTriangleMesh.VertexFactory = GSingleTriangleMeshVertexFactory;
+#else
+	ensure(false);
+#endif
 	LocalSingleTriangleMesh.MaterialRenderProxy = CloudVolumeMaterialProxy;
 	LocalSingleTriangleMesh.Elements[0].IndexBuffer = &GScreenRectangleIndexBuffer;
 	LocalSingleTriangleMesh.Elements[0].FirstIndex = 0;
@@ -1101,6 +1105,8 @@ private:
 		ERasterizerFillMode MeshFillMode,
 		ERasterizerCullMode MeshCullMode)
 	{
+		
+#if !ENABLE_TANGRAM
 		FMeshMaterialShaderElementData EmptyShaderElementData;
 		EmptyShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
 
@@ -1134,7 +1140,9 @@ private:
 			SortKey,
 			EMeshPassFeatures::Default,
 			EmptyShaderElementData);
-
+#else
+		ensure(false);
+#endif
 		return true;
 	}
 
@@ -1248,6 +1256,7 @@ private:
 	{
 		FMeshMaterialShaderElementData EmptyShaderElementData;
 		EmptyShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
+#if !ENABLE_TANGRAM
 
 		const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
@@ -1278,7 +1287,9 @@ private:
 			SortKey,
 			EMeshPassFeatures::Default,
 			EmptyShaderElementData);
-
+#else
+		ensure(false);
+#endif
 		return true;
 	}
 

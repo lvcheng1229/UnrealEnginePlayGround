@@ -44,6 +44,7 @@ void FMeshPassProcessor::BuildMeshDrawCommands(
 	EMeshPassFeatures MeshPassFeatures,
 	const ShaderElementDataType& ShaderElementData)
 {
+#if !ENABLE_TANGRAM
 	const FVertexFactory* RESTRICT VertexFactory = MeshBatch.VertexFactory;
 	const FPrimitiveSceneInfo* RESTRICT PrimitiveSceneInfo = PrimitiveSceneProxy ? PrimitiveSceneProxy->GetPrimitiveSceneInfo() : nullptr;
 
@@ -162,6 +163,9 @@ void FMeshPassProcessor::BuildMeshDrawCommands(
 			DrawListContext->FinalizeCommand(MeshBatch, BatchElementIndex, IdInfo, MeshFillMode, MeshCullMode, SortKey, Flags, PipelineState, &ShadersForDebugging, MeshDrawCommand);
 		}
 	}
+#else
+	ensure(false);
+#endif
 }
 
 /**

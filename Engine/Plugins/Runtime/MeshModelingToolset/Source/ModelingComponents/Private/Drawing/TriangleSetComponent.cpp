@@ -131,7 +131,11 @@ public:
 					FMeshBatchElement& BatchElement = Mesh.Elements[0];
 					BatchElement.IndexBuffer = &IndexBuffer;
 					Mesh.bWireframe = false;
+#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
+#else
+					ensure(false);
+#endif
 					Mesh.MaterialRenderProxy = MeshBatchData.MaterialProxy;
 
 					FDynamicPrimitiveUniformBuffer& DynamicPrimitiveUniformBuffer = Collector.AllocateOneFrameResource<FDynamicPrimitiveUniformBuffer>();

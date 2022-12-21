@@ -126,7 +126,11 @@ public:
 				FMeshBatchElement& BatchElement = Mesh.Elements[0];
 				BatchElement.IndexBuffer = &IndexBuffer;
 				Mesh.bWireframe = bWireframe;
+#if !ENABLE_TANGRAM
 				Mesh.VertexFactory = &VertexFactory;
+#else
+				ensure(false);
+#endif
 				Mesh.MaterialRenderProxy = MaterialProxy;
 
 				bool bHasPrecomputedVolumetricLightmap;

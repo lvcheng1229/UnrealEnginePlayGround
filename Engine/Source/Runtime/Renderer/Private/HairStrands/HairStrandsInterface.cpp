@@ -557,23 +557,31 @@ namespace HairStrands
 
 bool IsHairStrandsVF(const FMeshBatch* Mesh)
 {
+#if !ENABLE_TANGRAM
 	if (Mesh)
 	{
 		static const FHashedName& VFTypeRef = FVertexFactoryType::GetVFByName(TEXT("FHairStrandsVertexFactory"))->GetHashedName();
 		const FHashedName& VFType = Mesh->VertexFactory->GetType()->GetHashedName();
 		return VFType == VFTypeRef;
 	}
+#else
+	ensure(false);
+#endif
 	return false;
 }
 
 bool IsHairCardsVF(const FMeshBatch* Mesh)
 {
+#if !ENABLE_TANGRAM
 	if (Mesh)
 	{
 		static const FHashedName& VFTypeRef = FVertexFactoryType::GetVFByName(TEXT("FHairCardsVertexFactory"))->GetHashedName();
 		const FHashedName& VFType = Mesh->VertexFactory->GetType()->GetHashedName();
 		return VFType == VFTypeRef;
 	}
+#else
+	ensure(false);
+#endif
 	return false;
 }
 

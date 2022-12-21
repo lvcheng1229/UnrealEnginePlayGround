@@ -223,12 +223,17 @@ inline int32 FViewElementPDI::DrawMesh(const FMeshBatch& Mesh)
 			ENQUEUE_RENDER_COMMAND(FCopyDynamicPrimitiveShaderData)(
 				[NewMesh, DynamicPrimitiveCollectorForRT = DynamicPrimitiveCollector, FeatureLevel](FRHICommandListImmediate& RHICmdList)
 				{
+#if !ENABLE_TANGRAM
 					const bool bPrimitiveShaderDataComesFromSceneBuffer = NewMesh->VertexFactory->GetPrimitiveIdStreamIndex(FeatureLevel, EVertexInputStreamType::Default) >= 0;
-
+#else
+					const bool bPrimitiveShaderDataComesFromSceneBuffer = false;
+					ensure(false);
+#endif
 					for (int32 ElementIndex = 0; ElementIndex < NewMesh->Elements.Num(); ElementIndex++)
 					{
 						FMeshBatchElement& MeshElement = NewMesh->Elements[ElementIndex];
 
+#if !ENABLE_TANGRAM	
 						if (bPrimitiveShaderDataComesFromSceneBuffer)
 						{
 							checkf(!NewMesh->Elements[ElementIndex].PrimitiveUniformBuffer,
@@ -237,6 +242,10 @@ inline int32 FViewElementPDI::DrawMesh(const FMeshBatch& Mesh)
 
 						checkf(bPrimitiveShaderDataComesFromSceneBuffer || NewMesh->Elements[ElementIndex].PrimitiveUniformBufferResource != NULL,
 							TEXT("FMeshBatch was not properly setup.  The primitive uniform buffer must be specified."));
+#else
+					ensure(false);
+#endif
+
 					}
 
 					// If we are maintaining primitive scene data on the GPU, copy the primitive uniform buffer data to a unified array so it can be uploaded later
