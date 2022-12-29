@@ -976,7 +976,11 @@ void FKAggregateGeom::GetAggGeom(const FTransform& Transform, const FColor Color
 					ThisGeom.RenderInfo->IndexBuffer->InitResource();
 
 					ThisGeom.RenderInfo->CollisionVertexFactory = new FLocalVertexFactory(Collector.GetFeatureLevel(), "FKAggregateGeom");
+#if !ENABLE_TANGRAM	
 					ThisGeom.RenderInfo->VertexBuffers->InitFromDynamicVertex(ThisGeom.RenderInfo->CollisionVertexFactory, OutVerts);
+#else
+					ensure(false);
+#endif
 
 				}
 			}

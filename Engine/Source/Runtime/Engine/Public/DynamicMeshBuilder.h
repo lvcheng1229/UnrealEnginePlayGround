@@ -106,13 +106,21 @@ class FMeshBuilderOneFrameResources : public FOneFrameResource
 public:
 	class FPooledDynamicMeshVertexBuffer* VertexBuffer = nullptr;
 	class FPooledDynamicMeshIndexBuffer* IndexBuffer = nullptr;
+#if !ENABLE_TANGRAM
 	class FPooledDynamicMeshVertexFactory* VertexFactory = nullptr;
+#else
+	class FPooledDynamicMeshVertexAttribute* VertexAttribute = nullptr;
+#endif
 	class FDynamicMeshPrimitiveUniformBuffer* PrimitiveUniformBuffer = nullptr;
 	virtual ENGINE_API ~FMeshBuilderOneFrameResources();
 
 	inline bool IsValidForRendering() 
 	{
+#if !ENABLE_TANGRAM
 		return VertexBuffer && IndexBuffer && PrimitiveUniformBuffer && VertexFactory;
+#else
+		return VertexBuffer && IndexBuffer && PrimitiveUniformBuffer && VertexAttribute;
+#endif
 	}
 };
 

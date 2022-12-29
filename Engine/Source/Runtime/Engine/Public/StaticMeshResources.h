@@ -309,9 +309,12 @@ struct FStaticMeshVertexBuffers
 	/* This is a temporary function to refactor and convert old code, do not copy this as is and try to build your data as SoA from the beginning.*/
 	void ENGINE_API InitWithDummyData(FLocalVertexFactory* VertexFactory, uint32 NumVerticies, uint32 NumTexCoords = 1, uint32 LightMapIndex = 0);
 
+#if !ENABLE_TANGRAM
 	/* This is a temporary function to refactor and convert old code, do not copy this as is and try to build your data as SoA from the beginning.*/
 	void ENGINE_API InitFromDynamicVertex(FLocalVertexFactory* VertexFactory, TArray<FDynamicMeshVertex>& Vertices, uint32 NumTexCoords = 1, uint32 LightMapIndex = 0);
-
+#else
+	void ENGINE_API InitFromDynamicVertex(FTanGramLocalVertexAttribute* VertexFactory, TArray<FDynamicMeshVertex>& Vertices, uint32 NumTexCoords = 1, uint32 LightMapIndex = 0);
+#endif
 	/* This is a temporary function to refactor and convert old code, do not copy this as is and try to build your data as SoA from the beginning.*/
 	void ENGINE_API InitModelBuffers(TArray<FModelVertex>& Vertices);
 
@@ -580,8 +583,8 @@ struct ENGINE_API FStaticMeshVertexFactories
 		VertexFactory(InFeatureLevel, "FStaticMeshVertexFactories")
 		, VertexFactoryOverrideColorVertexBuffer(InFeatureLevel, "FStaticMeshVertexFactories_Override")
 #else
-		TanGramLocalVertexAttribute(InFeatureLevel)
-		, TanGramLocalVertexAttributeOverrideColorVertexBuffer(InFeatureLevel)
+		TanGramLocalVertexAttribute(InFeatureLevel, "FStaticMeshVertexAttributes")
+		, TanGramLocalVertexAttributeOverrideColorVertexBuffer(InFeatureLevel, "FStaticMeshVertexAttributes_Override")
 #endif
 		, SplineVertexFactory(nullptr)
 		, SplineVertexFactoryOverrideColorVertexBuffer(nullptr)
@@ -870,8 +873,14 @@ protected:
 		bool bWireframe,
 		bool bUseInversedIndices,
 		bool bAllowPreCulledIndices,
+#if !ENABLE_TANGRAM
 		const FVertexFactory* VertexFactory,
+#else
+		const FTanGramVertexAttribute* TanGramVertexAttribute,
+#endif
 		FMeshBatch& OutMeshElement) const;
+	
+
 
 	/** Sets the screen size on a mesh element. */
 	void SetMeshElementScreenSize(int32 LODIndex, bool bDitheredLODTransition, FMeshBatch& OutMeshBatch) const;

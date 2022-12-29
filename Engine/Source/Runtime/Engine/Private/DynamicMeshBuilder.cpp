@@ -535,6 +535,7 @@ private:
 	FDynamicMeshBufferAllocator& DynamicMeshBufferAllocator;
 };
 
+#if !ENABLE_TANGRAM
 /** The vertex factory type used for dynamic meshes. */
 class FPooledDynamicMeshVertexFactory : public FDynamicPrimitiveResource, public FLocalVertexFactory
 {
@@ -638,6 +639,110 @@ private:
 	const FPooledDynamicMeshVertexBuffer* VertexBuffer;
 
 };
+
+#else
+/*
+* TanGram
+*/
+class FPooledDynamicMeshVertexAttribute :public FDynamicPrimitiveResource, public FTanGramLocalVertexAttribute
+{
+public:
+	FPooledDynamicMeshVertexAttribute(ERHIFeatureLevel::Type InFeatureLevel, const FPooledDynamicMeshVertexBuffer* InVertexBuffer) : FTanGramLocalVertexAttribute(InFeatureLevel, "FPooledDynamicMeshVertexAttribute"), VertexBuffer(InVertexBuffer) {}
+
+	void InitResource() override
+	{
+		FTanGramLocalVertexAttribute* VertexAttribute = this;
+		const FPooledDynamicMeshVertexBuffer* PooledVertexBuffer = VertexBuffer;
+		ENQUEUE_RENDER_COMMAND(InitDynamicMeshVertexAttribute)(
+			[VertexAttribute, PooledVertexBuffer](FRHICommandListImmediate& RHICmdList)
+			{
+				FStaticMeshDataType Data;
+				Data.PositionComponent = FVertexStreamComponent(
+					&PooledVertexBuffer->PositionBuffer,
+					0,
+					sizeof(FVector3f),
+					VET_Float3
+				);
+
+				Data.NumTexCoords = PooledVertexBuffer->GetNumTexCoords();
+				{
+					Data.LightMapCoordinateIndex = PooledVertexBuffer->GetLightmapCoordinateIndex();
+					Data.TangentsSRV = PooledVertexBuffer->TangentBufferSRV;
+					Data.TextureCoordinatesSRV = PooledVertexBuffer->TexCoordBufferSRV;
+					Data.ColorComponentsSRV = PooledVertexBuffer->ColorBufferSRV;
+					Data.PositionComponentSRV = PooledVertexBuffer->PositionBufferSRV;
+				}
+
+				{
+					EVertexElementType UVDoubleWideVertexElementType = VET_None;
+					EVertexElementType UVVertexElementType = VET_None;
+					uint32 UVSizeInBytes = 0;
+					if (PooledVertexBuffer->GetUse16bitTexCoords())
+					{
+						UVSizeInBytes = sizeof(FVector2DHalf);
+						UVDoubleWideVertexElementType = VET_Half4;
+						UVVertexElementType = VET_Half2;
+					}
+					else
+					{
+						UVSizeInBytes = sizeof(FVector2f);
+						UVDoubleWideVertexElementType = VET_Float4;
+						UVVertexElementType = VET_Float2;
+					}
+
+					int32 UVIndex;
+					uint32 UvStride = UVSizeInBytes * PooledVertexBuffer->GetNumTexCoords();
+					for (UVIndex = 0; UVIndex < (int32)PooledVertexBuffer->GetNumTexCoords() - 1; UVIndex += 2)
+					{
+						Data.TextureCoordinates.Add
+						(
+							FVertexStreamComponent(
+								&PooledVertexBuffer->TexCoordBuffer,
+								UVSizeInBytes * UVIndex,
+								UvStride,
+								UVDoubleWideVertexElementType,
+								EVertexStreamUsage::ManualFetch
+							)
+						);
+					}
+
+					// possible last UV channel if we have an odd number
+					if (UVIndex < (int32)PooledVertexBuffer->GetNumTexCoords())
+					{
+						Data.TextureCoordinates.Add(FVertexStreamComponent(
+							&PooledVertexBuffer->TexCoordBuffer,
+							UVSizeInBytes * UVIndex,
+							UvStride,
+							UVVertexElementType,
+							EVertexStreamUsage::ManualFetch
+						));
+					}
+
+					Data.TangentBasisComponents[0] = FVertexStreamComponent(&PooledVertexBuffer->TangentBuffer, 0, 2 * sizeof(FPackedNormal), VET_PackedNormal, EVertexStreamUsage::ManualFetch);
+					Data.TangentBasisComponents[1] = FVertexStreamComponent(&PooledVertexBuffer->TangentBuffer, sizeof(FPackedNormal), 2 * sizeof(FPackedNormal), VET_PackedNormal, EVertexStreamUsage::ManualFetch);
+					Data.ColorComponent = FVertexStreamComponent(&PooledVertexBuffer->ColorBuffer, 0, sizeof(FColor), VET_Color, EVertexStreamUsage::ManualFetch);
+				}
+				VertexAttribute->SetData(Data);
+			});
+		FTanGramLocalVertexAttribute::InitResource();
+	}
+
+	//FDynamicPrimitiveResource interface BEGIN
+	void InitPrimitiveResource() override
+	{
+		InitResource();
+	}
+
+	void ReleasePrimitiveResource() override
+	{
+		ReleaseResource();
+		delete this;
+	}
+	//FDynamicPrimitiveResource interface END
+private:
+	const FPooledDynamicMeshVertexBuffer* VertexBuffer;
+};
+#endif
 
 /** The primitive uniform buffer used for dynamic meshes. */
 class FDynamicMeshPrimitiveUniformBuffer : public FDynamicPrimitiveResource, public TUniformBuffer<FPrimitiveUniformShaderParameters>
@@ -770,13 +875,19 @@ FMeshBuilderOneFrameResources::~FMeshBuilderOneFrameResources()
 		}
 		delete IndexBuffer;
 	}
-
+#if !ENABLE_TANGRAM
 	if (VertexFactory)
 	{
 		VertexFactory->ReleaseResource();
 		delete VertexFactory;
 	}
-
+#else
+	if (VertexAttribute)
+	{
+		VertexAttribute->ReleaseResource();
+		delete VertexAttribute;
+	}
+#endif
 	if (PrimitiveUniformBuffer)
 	{
 		PrimitiveUniformBuffer->ReleaseResource();
@@ -849,8 +960,14 @@ void FDynamicMeshBuilder::GetMesh(
 			{
 				OneFrameResources->IndexBuffer->InitResource();
 			}
+
+#if !ENABLE_TANGRAM
 			OneFrameResources->VertexFactory = new FPooledDynamicMeshVertexFactory(FeatureLevel, VertexBuffer);
 			OneFrameResources->VertexFactory->InitResource();
+#else
+			OneFrameResources->VertexAttribute = new FPooledDynamicMeshVertexAttribute(FeatureLevel, VertexBuffer);
+			OneFrameResources->VertexAttribute->InitResource();
+#endif
 
 			// Create the primitive uniform buffer.
 			OneFrameResources->PrimitiveUniformBuffer = new FDynamicMeshPrimitiveUniformBuffer();
@@ -891,7 +1008,7 @@ void FDynamicMeshBuilder::GetMesh(
 #if !ENABLE_TANGRAM
 		Mesh.VertexFactory = OneFrameResources->VertexFactory;
 #else
-		ensure(false);
+		Mesh.TanGramVertexAttribute = OneFrameResources->VertexAttribute;
 #endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = OneFrameResources->PrimitiveUniformBuffer;
@@ -936,10 +1053,13 @@ void FDynamicMeshBuilder::GetMeshElement(const FMatrix& LocalToWorld, const FMat
 			{
 				OneFrameResource.IndexBuffer->InitResource();
 			}
-
+#if !ENABLE_TANGRAM
 			OneFrameResource.VertexFactory = new FPooledDynamicMeshVertexFactory(FeatureLevel, VertexBuffer);
 			OneFrameResource.VertexFactory->InitResource();
-
+#else
+			OneFrameResource.VertexAttribute = new FPooledDynamicMeshVertexAttribute(FeatureLevel, VertexBuffer);
+			OneFrameResource.VertexAttribute->InitResource();
+#endif
 			// Create the primitive uniform buffer.
 			OneFrameResource.PrimitiveUniformBuffer = new FDynamicMeshPrimitiveUniformBuffer();
 			FPrimitiveUniformShaderParameters PrimitiveParams = FPrimitiveUniformShaderParametersBuilder{}
@@ -977,7 +1097,7 @@ void FDynamicMeshBuilder::GetMeshElement(const FMatrix& LocalToWorld, const FMat
 #if !ENABLE_TANGRAM
 		Mesh.VertexFactory = OneFrameResource.VertexFactory;
 #else
-		ensure(false);
+		Mesh.TanGramVertexAttribute = OneFrameResource.VertexAttribute;
 #endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = OneFrameResource.PrimitiveUniformBuffer;
@@ -1010,10 +1130,14 @@ void FDynamicMeshBuilder::Draw(FPrimitiveDrawInterface* PDI,const FMatrix& Local
 			PDI->RegisterDynamicResource(IndexBuffer);
 		}
 
+#if !ENABLE_TANGRAM
 		// Create the vertex factory.
 		FPooledDynamicMeshVertexFactory* VertexFactory = new FPooledDynamicMeshVertexFactory(FeatureLevel, VertexBuffer);
 		PDI->RegisterDynamicResource(VertexFactory);
-
+#else
+		FPooledDynamicMeshVertexAttribute* VertexAttribute = new FPooledDynamicMeshVertexAttribute(FeatureLevel, VertexBuffer);
+		PDI->RegisterDynamicResource(VertexAttribute);
+#endif
 		// Create the primitive uniform buffer.
 		FDynamicMeshPrimitiveUniformBuffer* PrimitiveUniformBuffer = new FDynamicMeshPrimitiveUniformBuffer();
 		FPrimitiveUniformShaderParameters PrimitiveParams = FPrimitiveUniformShaderParametersBuilder{}
@@ -1044,7 +1168,7 @@ void FDynamicMeshBuilder::Draw(FPrimitiveDrawInterface* PDI,const FMatrix& Local
 #if !ENABLE_TANGRAM
 		Mesh.VertexFactory = VertexFactory;
 #else
-		ensure(false);
+		Mesh.TanGramVertexAttribute = VertexAttribute;
 #endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = PrimitiveUniformBuffer;

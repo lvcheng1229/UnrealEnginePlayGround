@@ -703,7 +703,11 @@ void FTextRenderSceneProxy::CreateRenderThreadResources()
 	TArray<FDynamicMeshVertex> OutVertices;
 	if(BuildStringMesh(OutVertices, IndexBuffer.Indices))
 	{
+#if !ENABLE_TANGRAM
 		VertexBuffers.InitFromDynamicVertex(&VertexFactory, OutVertices);
+#else
+		ensure(false);
+#endif
 		// Enqueue initialization of render resources
 		BeginInitResource(&IndexBuffer);
 	}

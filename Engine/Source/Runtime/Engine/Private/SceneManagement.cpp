@@ -307,7 +307,7 @@ void FMeshElementCollector::AddMesh(int32 ViewIndex, FMeshBatch& MeshBatch)
 		}
 	}
 #else
-	ensure(false);
+	ensure(UseGPUScene(GMaxRHIShaderPlatform, FeatureLevel) == false);
 #endif
 	MeshBatch.MaterialRenderProxy->UpdateUniformExpressionCacheIfNeeded(Views[ViewIndex]->GetFeatureLevel());
 
@@ -1332,7 +1332,118 @@ bool FMeshBatch::Validate(const FPrimitiveSceneProxy* PrimitiveSceneProxy, ERHIF
 		}
 	}
 #else
-	ensure(false);
+	const auto LogMeshError = [&](const FString& Error) -> bool
+	{
+		const uint32 bVertexFactoryInitialized = (TanGramVertexAttribute && TanGramVertexAttribute->IsInitialized()) ? 1 : 0;
+
+		ensureMsgf(false,
+			TEXT("FMeshBatch was not properly setup. %s.\nconst FString[Name: , Initialized: %u]\n\tPrimitiveSceneProxy[Level: %s, Owner: %s, Resource: %s]"),
+			*Error,
+			bVertexFactoryInitialized,
+			*PrimitiveSceneProxy->GetLevelName().ToString(),
+			*PrimitiveSceneProxy->GetOwnerName().ToString(),
+			*PrimitiveSceneProxy->GetResourceName().ToString());
+
+		return false;
+	};
+
+	if (!MaterialRenderProxy)
+	{
+		return LogMeshError(TEXT("Mesh has a null material render proxy!"));
+	}
+
+	if (!PrimitiveSceneProxy->VerifyUsedMaterial(MaterialRenderProxy))
+	{
+		return LogMeshError(TEXT("Mesh material is not marked as used by the primitive scene proxy."));
+	}
+
+	if (!TanGramVertexAttribute)
+	{
+		return LogMeshError(TEXT("Mesh has a null vertex factory!"));
+	}
+
+	if (!TanGramVertexAttribute->IsInitialized())
+	{
+		return LogMeshError(TEXT("Mesh has an uninitialized vertex factory!"));
+	}
+
+	for (int32 Index = 0; Index < Elements.Num(); ++Index)
+	{
+		const FMeshBatchElement& MeshBatchElement = Elements[Index];
+
+		if (MeshBatchElement.IndexBuffer)
+		{
+			if (const FRHIBuffer* IndexBufferRHI = MeshBatchElement.IndexBuffer->IndexBufferRHI)
+			{
+				const uint32 IndexCount = GetVertexCountForPrimitiveCount(MeshBatchElement.NumPrimitives, Type);
+				const uint32 IndexBufferSize = IndexBufferRHI->GetSize();
+
+				// A zero-sized index buffer is valid for streaming.
+				if (IndexBufferSize != 0 && (MeshBatchElement.FirstIndex + IndexCount) * IndexBufferRHI->GetStride() > IndexBufferSize)
+				{
+					return LogMeshError(FString::Printf(
+						TEXT("MeshBatchElement %d, Material '%s', index range extends past index buffer bounds: Start %u, Count %u, Buffer Size %u, Buffer stride %u"),
+						Index, MaterialRenderProxy ? *MaterialRenderProxy->GetFriendlyName() : TEXT("nullptr"),
+						MeshBatchElement.FirstIndex, IndexCount, IndexBufferRHI->GetSize(), IndexBufferRHI->GetStride()));
+				}
+			}
+			else
+			{
+				return LogMeshError(FString::Printf(
+					TEXT("FMeshElementCollector::AddMesh - On MeshBatchElement %d, Material '%s', index buffer object has null RHI resource"),
+					Index, MaterialRenderProxy ? *MaterialRenderProxy->GetFriendlyName() : TEXT("nullptr")));
+			}
+		}
+	}
+	
+	//TanGram_GPUScene
+	//const bool bVFSupportsPrimitiveIdStream = VertexFactory->GetType()->SupportsPrimitiveIdStream();
+	//
+	//if (!PrimitiveSceneProxy->DoesVFRequirePrimitiveUniformBuffer() && !bVFSupportsPrimitiveIdStream)
+	//{
+	//	return LogMeshError(TEXT("PrimitiveSceneProxy has bVFRequiresPrimitiveUniformBuffer disabled yet tried to draw with a vertex factory that did not support PrimitiveIdStream"));
+	//}
+
+	//if (PrimitiveSceneProxy->SupportsGPUScene() && !VertexFactory->SupportsGPUScene(FeatureLevel))
+	//{
+	//	return LogMeshError(TEXT("PrimitiveSceneProxy has SupportsGPUScene() does not match VertexFactory->SupportsGPUScene()"));
+	//}
+
+	const bool bUseGPUScene = UseGPUScene(GMaxRHIShaderPlatform, FeatureLevel);
+	ensure(bUseGPUScene == false);
+
+	//const bool bPrimitiveShaderDataComesFromSceneBuffer = bUseGPUScene && VertexFactory->GetPrimitiveIdStreamIndex(FeatureLevel, EVertexInputStreamType::Default) >= 0;
+
+	const bool bPrimitiveHasUniformBuffer = PrimitiveSceneProxy->GetUniformBuffer() != nullptr;
+
+	//for (int32 ElementIndex = 0; ElementIndex < Elements.Num(); ElementIndex++)
+	//{
+	//	const FMeshBatchElement& MeshElement = Elements[ElementIndex];
+	//
+	//	if (bPrimitiveShaderDataComesFromSceneBuffer && Elements[ElementIndex].PrimitiveUniformBuffer)
+	//	{
+	//		// on mobile VS has access to PrimitiveUniformBuffer
+	//		if (FeatureLevel > ERHIFeatureLevel::ES3_1)
+	//		{
+	//			// This is a non-fatal error.
+	//			LogMeshError(
+	//				TEXT("FMeshBatch was assigned a PrimitiveUniformBuffer even though the vertex factory fetches primitive shader data through the GPUScene buffer. ")
+	//				TEXT("The assigned PrimitiveUniformBuffer cannot be respected. Use PrimitiveUniformBufferResource instead for dynamic primitive data, or leave ")
+	//				TEXT("both null to get FPrimitiveSceneProxy->UniformBuffer"));
+	//		}
+	//	}
+	//
+	//	const bool bValidPrimitiveData =
+	//		bPrimitiveShaderDataComesFromSceneBuffer
+	//		|| bPrimitiveHasUniformBuffer
+	//		|| Elements[ElementIndex].PrimitiveUniformBuffer
+	//		|| Elements[ElementIndex].PrimitiveUniformBufferResource;
+	//
+	//	if (!bValidPrimitiveData)
+	//	{
+	//		return LogMeshError(TEXT("No primitive uniform buffer was specified and the vertex factory does not have a valid primitive id stream"));
+	//	}
+	//}
 #endif
 	return true;
 }

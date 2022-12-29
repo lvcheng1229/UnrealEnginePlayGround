@@ -143,7 +143,19 @@ public:
 				FeatureLevel
 				);
 #else
-			ensure(false);
+			bool bSupportsNaniteRendering = false;
+			bool bSupportsGPUScene = false;
+			FStaticMeshBatchRelevance* StaticMeshRelevance = new(PrimitiveSceneInfo->StaticMeshRelevances) FStaticMeshBatchRelevance(
+				*StaticMesh,
+				ScreenSize,
+				bSupportsCachingMeshDrawCommands,
+				bUseSkyMaterial,
+				bUseSingleLayerWaterMaterial,
+				bUseAnisotropy,
+				bSupportsNaniteRendering,
+				bSupportsGPUScene,
+				FeatureLevel
+			);
 #endif
 		}
 	}

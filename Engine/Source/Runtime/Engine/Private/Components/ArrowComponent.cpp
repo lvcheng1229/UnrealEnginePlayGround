@@ -41,7 +41,11 @@ public:
 
 	FArrowSceneProxy(UArrowComponent* Component)
 		: FPrimitiveSceneProxy(Component)
+#if !ENABLE_TANGRAM
 		, VertexFactory(GetScene().GetFeatureLevel(), "FArrowSceneProxy")
+#else
+		, VertexAttribute(GetScene().GetFeatureLevel(), "FArrowSceneProxy")
+#endif
 		, ArrowColor(Component->ArrowColor)
 		, ArrowSize(Component->ArrowSize)
 		, ArrowLength(Component->ArrowLength)
@@ -74,9 +78,12 @@ public:
 		TArray<FDynamicMeshVertex> OutVerts;
 		BuildConeVerts(HeadAngle, HeadAngle, -HeadLength, TotalLength, 32, OutVerts, IndexBuffer.Indices);
 		BuildCylinderVerts(ShaftCenter, FVector(0,0,1), FVector(0,1,0), FVector(1,0,0), ShaftRadius, 0.5f * ShaftLength, 16, OutVerts, IndexBuffer.Indices);
-
+#if !ENABLE_TANGRAM
 		VertexBuffers.InitFromDynamicVertex(&VertexFactory, OutVerts);
-
+#else
+		VertexBuffers.InitFromDynamicVertex(&VertexAttribute,OutVerts);
+		UE_LOG(LogTanGram, Warning, TEXT("FArrowSceneProxy: where is vertexbuffers be used?"));
+#endif
 		// Enqueue initialization of render resource
 		BeginInitResource(&IndexBuffer);
 	}
@@ -87,7 +94,11 @@ public:
 		VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
 		VertexBuffers.ColorVertexBuffer.ReleaseResource();
 		IndexBuffer.ReleaseResource();
-		VertexFactory.ReleaseResource();
+#if !ENABLE_TANGRAM
+		VertexFactoy.ReleaseResource();
+#else
+		VertexAttribute.ReleaseResource();
+#endif
 	}
 
 	// FPrimitiveSceneProxy interface.
@@ -150,7 +161,7 @@ public:
 #if !ENABLE_TANGRAM
 				Mesh.VertexFactory = &VertexFactory;
 #else
-				ensure(false);
+				Mesh.TanGramVertexAttribute = &VertexAttribute;
 #endif	
 				Mesh.MaterialRenderProxy = ArrowMaterialRenderProxy;
 
@@ -202,8 +213,11 @@ public:
 private:
 	FStaticMeshVertexBuffers VertexBuffers;
 	FDynamicMeshIndexBuffer32 IndexBuffer;
+#if !ENABLE_TANGRAM
 	FLocalVertexFactory VertexFactory;
-
+#else
+	FTanGramLocalVertexAttribute VertexAttribute;
+#endif
 	FVector Origin;
 	FColor ArrowColor;
 	float ArrowSize;

@@ -629,6 +629,8 @@ inline bool IsUsingDistanceFields(const FStaticShaderPlatform Platform)
 
 inline bool UseGPUScene(const FStaticShaderPlatform Platform, const FStaticFeatureLevel FeatureLevel)
 {
+	return false;
+
 	if (FeatureLevel == ERHIFeatureLevel::ES3_1)
 	{
 		return MobileSupportsGPUScene();
