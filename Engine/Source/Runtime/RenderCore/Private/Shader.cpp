@@ -71,9 +71,10 @@ void Freeze::IntrinsicToString(const TIndexedPtr<FVertexFactoryType>& Object, co
 IMPLEMENT_EXPORTED_INTRINSIC_TYPE_LAYOUT(TIndexedPtr<FShaderType>);
 IMPLEMENT_EXPORTED_INTRINSIC_TYPE_LAYOUT(TIndexedPtr<FVertexFactoryType>);
 
+//TanGram
 static TAutoConsoleVariable<int32> CVarUsePipelines(
 	TEXT("r.ShaderPipelines"),
-	1,
+	0,
 	TEXT("Enable using Shader pipelines."));
 
 static TAutoConsoleVariable<int32> CVarSkipShaderCompression(

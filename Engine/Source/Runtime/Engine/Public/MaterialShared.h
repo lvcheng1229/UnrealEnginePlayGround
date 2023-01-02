@@ -33,6 +33,8 @@
 
 #include <atomic>
 
+#include "TanGramVertexAttribute.h"
+
 struct FExpressionInput;
 struct FExtraShaderCompilerSettings;
 class FMaterial;
@@ -864,7 +866,11 @@ public:
 	{ }
 
 #if WITH_EDITOR
+#if !ENABLE_TANGRAM
 	ENGINE_API void SetShaderDependencies(const TArray<FShaderType*>& ShaderTypes, const TArray<const FShaderPipelineType*>& ShaderPipelineTypes, const TArray<FVertexFactoryType*>& VFTypes, EShaderPlatform ShaderPlatform);
+#else
+	ENGINE_API void SetShaderDependencies(const TArray<FShaderType*>& ShaderTypes, const TArray<const FShaderPipelineType*>& ShaderPipelineTypes, const TArray<FTanGramVertexAttributeType*>& TVATypes, EShaderPlatform ShaderPlatform);
+#endif
 #endif
 
 	void Serialize(FArchive& Ar, bool bLoadedByCookedMaterial);
@@ -1239,7 +1245,11 @@ public:
 #endif
 
 	// Accessors.
+#if !ENABLE_TANGRAM
 	const FMeshMaterialShaderMap* GetMeshShaderMap(const FVertexFactoryType* VertexFactoryType) const { return GetContent()->GetMeshShaderMap(VertexFactoryType->GetHashedName()); }
+#else
+	const FMeshMaterialShaderMap* GetMeshShaderMap(const FTanGramVertexAttributeType* TanGramVertexAttributeType) const { return GetContent()->GetMeshShaderMap(TanGramVertexAttributeType->GetHashedName()); }
+#endif
 	const FMeshMaterialShaderMap* GetMeshShaderMap(const FHashedName& VertexFactoryTypeName) const { return GetContent()->GetMeshShaderMap(VertexFactoryTypeName); }
 	FMeshMaterialShaderMap* AcquireMeshShaderMap(const FVertexFactoryType* VertexFactoryType) { return GetMutableContent()->AcquireMeshShaderMap(VertexFactoryType->GetHashedName()); }
 	FMeshMaterialShaderMap* AcquireMeshShaderMap(const FHashedName& VertexFactoryTypeName) { return GetMutableContent()->AcquireMeshShaderMap(VertexFactoryTypeName); }
@@ -1969,18 +1979,33 @@ public:
 	 * Finds the shader matching the template type and the passed in vertex factory, asserts if not found.
 	 * Note - Only implemented for FMeshMaterialShaderTypes
 	 */
+#if !ENABLE_TANGRAM
 	template<typename ShaderType>
 	TShaderRef<ShaderType> GetShader(FVertexFactoryType* VertexFactoryType, const typename ShaderType::FPermutationDomain& PermutationVector, bool bFatalIfMissing = true) const
 	{
 		return GetShader<ShaderType>(VertexFactoryType, PermutationVector.ToDimensionValueId(), bFatalIfMissing);
 	}
+#else
+	template<typename ShaderType>
+	TShaderRef<ShaderType> GetShader(FTanGramVertexAttributeType* TanGramVertexAttributeType, const typename ShaderType::FPermutationDomain& PermutationVector, bool bFatalIfMissing = true) const
+	{
+		return GetShader<ShaderType>(TanGramVertexAttributeType, PermutationVector.ToDimensionValueId(), bFatalIfMissing);
+	}
+#endif
 
+#if !ENABLE_TANGRAM
 	template <typename ShaderType>
 	TShaderRef<ShaderType> GetShader(FVertexFactoryType* VertexFactoryType, int32 PermutationId = 0, bool bFatalIfMissing = true) const
 	{
 		return TShaderRef<ShaderType>::Cast(GetShader(&ShaderType::StaticType, VertexFactoryType, PermutationId, bFatalIfMissing));
 	}
-
+#else
+	template <typename ShaderType>
+	TShaderRef<ShaderType> GetShader(FTanGramVertexAttributeType* TanGramVertexAttributeType, int32 PermutationId = 0, bool bFatalIfMissing = true) const
+	{
+		return TShaderRef<ShaderType>::Cast(GetShader(&ShaderType::StaticType, TanGramVertexAttributeType, PermutationId, bFatalIfMissing));
+	}
+#endif
 	ENGINE_API FShaderPipelineRef GetShaderPipeline(class FShaderPipelineType* ShaderPipelineType, FVertexFactoryType* VertexFactoryType, bool bFatalIfNotFound = true) const;
 
 	ENGINE_API bool TryGetShaders(const FMaterialShaderTypes& InTypes, const FVertexFactoryType* InVertexFactoryType, FMaterialShaders& OutShaders) const;
@@ -2133,7 +2158,12 @@ protected:
 	virtual FGuid GetMaterialId() const = 0;
 	
 	/** Produces arrays of any shader and vertex factory type that this material is dependent on. */
+#if !ENABLE_TANGRAM
 	ENGINE_API void GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPlatformTypeLayoutParameters& LayoutParams, TArray<FShaderType*>& OutShaderTypes, TArray<const FShaderPipelineType*>& OutShaderPipelineTypes, TArray<FVertexFactoryType*>& OutVFTypes) const;
+#else
+	ENGINE_API void GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPlatformTypeLayoutParameters& LayoutParams, TArray<FShaderType*>& OutShaderTypes, TArray<const FShaderPipelineType*>& OutShaderPipelineTypes, TArray<FTanGramVertexAttributeType*>& OutTVATypes) const;
+#endif
+
 
 	bool GetLoadedCookedShaderMapId() const { return bLoadedCookedShaderMapId; }
 
@@ -2257,8 +2287,11 @@ private:
 	/**
 	 * Finds the shader matching the template type and the passed in vertex factory, asserts if not found.
 	 */
+#if !ENABLE_TANGRAM
 	ENGINE_API TShaderRef<FShader> GetShader(class FMeshMaterialShaderType* ShaderType, FVertexFactoryType* VertexFactoryType, int32 PermutationId, bool bFatalIfMissing = true) const;
-
+#else
+	ENGINE_API TShaderRef<FShader> GetShader(class FMeshMaterialShaderType* ShaderType, FTanGramVertexAttributeType* TanGramVertexAttributeType, int32 PermutationId, bool bFatalIfMissing = true) const;
+#endif
 	void GetReferencedTexturesHash(EShaderPlatform Platform, FSHAHash& OutHash) const;
 
 	friend class FMaterialShaderMap;

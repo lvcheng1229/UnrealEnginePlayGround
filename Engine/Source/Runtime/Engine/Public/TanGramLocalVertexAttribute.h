@@ -2,10 +2,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "TanGramVertexAttribute.h"
 
 class ENGINE_API FTanGramLocalVertexAttribute : public FTanGramVertexAttribute
 {
+public: 
+	static FTanGramVertexAttributeType StaticType; 
+	virtual FTanGramVertexAttributeType* GetType() const override;;
 public:
 	FTanGramLocalVertexAttribute(ERHIFeatureLevel::Type InFeatureLevel, const char* InDebugName)
 		:FTanGramVertexAttribute(InFeatureLevel)
@@ -22,23 +26,24 @@ public:
 	}
 
 	void SetData(const FStaticMeshDataType& InData);
-
 protected:
 
 	const FStaticMeshDataType& GetData() const { return TanGramVertexData; }
 
 	FStaticMeshDataType TanGramVertexData;
 
+#if !UE_BUILD_SHIPPING
 	struct FDebugName
 	{
 		FDebugName(const char* InDebugName)
-#if !UE_BUILD_SHIPPING
-			: DebugName(InDebugName)
-#endif
-		{}
+		: DebugName(InDebugName){}
 	private:
-#if !UE_BUILD_SHIPPING
 		const char* DebugName;
-#endif
 	} DebugName;
+#else
+	struct FDebugName
+	{
+		FDebugName(const char* InDebugName){}
+	} DebugName;
+#endif
 };

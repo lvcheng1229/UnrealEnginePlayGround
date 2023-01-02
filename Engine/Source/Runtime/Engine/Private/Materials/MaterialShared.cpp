@@ -659,17 +659,26 @@ void FMaterial::GetShaderMapId(EShaderPlatform Platform, const ITargetPlatform* 
 		OutId.LayoutParams.InitializeForPlatform(TargetPlatform);
 
 		TArray<FShaderType*> ShaderTypes;
-		TArray<FVertexFactoryType*> VFTypes;
 		TArray<const FShaderPipelineType*> ShaderPipelineTypes;
-
+#if!ENABLE_TANGRAM
+		TArray<FVertexFactoryType*> VFTypes;
 		GetDependentShaderAndVFTypes(Platform, OutId.LayoutParams, ShaderTypes, ShaderPipelineTypes, VFTypes);
+#else
+		TArray<FTanGramVertexAttributeType*> TVATypes;
+		GetDependentShaderAndVFTypes(Platform, OutId.LayoutParams, ShaderTypes, ShaderPipelineTypes, TVATypes);
+#endif
+		
 
 		OutId.Usage = GetShaderMapUsage();
 		OutId.bUsingNewHLSLGenerator = IsUsingNewHLSLGenerator();
 		OutId.BaseMaterialId = GetMaterialId();
 		OutId.QualityLevel = GetQualityLevel();
 		OutId.FeatureLevel = GetFeatureLevel();
+#if!ENABLE_TANGRAM
 		OutId.SetShaderDependencies(ShaderTypes, ShaderPipelineTypes, VFTypes, Platform);
+#else
+		OutId.SetShaderDependencies(ShaderTypes, ShaderPipelineTypes, TVATypes, Platform);
+#endif
 		GetReferencedTexturesHash(Platform, OutId.TextureReferencesHash);
 
 #else
@@ -2558,19 +2567,27 @@ const FMaterialRenderProxy* FColoredMaterialRenderProxy::GetFallback(ERHIFeature
 /**
  * Finds the shader matching the template type and the passed in vertex factory, asserts if not found.
  */
+#if !ENABLE_TANGRAM
 TShaderRef<FShader> FMaterial::GetShader(FMeshMaterialShaderType* ShaderType, FVertexFactoryType* VertexFactoryType, int32 PermutationId, bool bFatalIfMissing) const
+#else
+TShaderRef<FShader> FMaterial::GetShader(FMeshMaterialShaderType* ShaderType, FTanGramVertexAttributeType* TanGramVertexAttributeType, int32 PermutationId, bool bFatalIfMissing) const
+#endif
 {
 #if WITH_EDITOR && DO_CHECK
 	// Attempt to get some more info for a rare crash (UE-35937)
 	FMaterialShaderMap* GameThreadShaderMapPtr = GameThreadShaderMap;
 	checkf( RenderingThreadShaderMap, TEXT("RenderingThreadShaderMap was NULL (GameThreadShaderMap is %p). This may relate to bug UE-35937"), GameThreadShaderMapPtr );
 #endif
+#if ENABLE_TANGRAM
+	FTanGramVertexAttributeType* VertexFactoryType = TanGramVertexAttributeType;
+#endif
+	
 	const FMeshMaterialShaderMap* MeshShaderMap = RenderingThreadShaderMap->GetMeshShaderMap(VertexFactoryType);
 	FShader* Shader = MeshShaderMap ? MeshShaderMap->GetShader(ShaderType, PermutationId) : nullptr;
 	if (!Shader)
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(FMaterial::GetShader);
-
+#if !ENABLE_TANGRAM
 		if (bFatalIfMissing)
 		{
 			auto noinline_lambda = [&](...) FORCENOINLINE
@@ -2623,7 +2640,9 @@ TShaderRef<FShader> FMaterial::GetShader(FMeshMaterialShaderType* ShaderType, FV
 			};
 			noinline_lambda();
 		}
-
+#else
+		ensure(false);
+#endif
 		return TShaderRef<FShader>();
 	}
 
@@ -2667,10 +2686,14 @@ bool FMaterial::TryGetShaders(const FMaterialShaderTypes& InTypes, const FVertex
 	OutShaders.ShaderMap = ShaderMap;
 	const EShaderPlatform ShaderPlatform = ShaderMap->GetShaderPlatform();
 	const EShaderPermutationFlags PermutationFlags = ShaderMap->GetPermutationFlags();
+#if !ENABLE_TANGRAM
 	const FShaderMapContent* ShaderMapContent = InVertexFactoryType
 		? static_cast<const FShaderMapContent*>(ShaderMap->GetMeshShaderMap(InVertexFactoryType))
 		: static_cast<const FShaderMapContent*>(ShaderMap->GetContent());
-
+#else
+	const FShaderMapContent* ShaderMapContent = nullptr;
+	ensure(false);
+#endif
 	TArray<FShaderCommonCompileJobPtr> CompileJobs;
 	bool bMissingShader = false;
 
@@ -2817,6 +2840,7 @@ bool FMaterial::ShouldCacheShaders(const FMaterialShaderTypes& InTypes, const FV
 
 FShaderPipelineRef FMaterial::GetShaderPipeline(class FShaderPipelineType* ShaderPipelineType, FVertexFactoryType* VertexFactoryType, bool bFatalIfNotFound) const
 {
+#if !ENABLE_TANGRAM
 	const FMeshMaterialShaderMap* MeshShaderMap = RenderingThreadShaderMap->GetMeshShaderMap(VertexFactoryType);
 	FShaderPipeline* ShaderPipeline = MeshShaderMap ? MeshShaderMap->GetShaderPipeline(ShaderPipelineType) : nullptr;
 	if (!ShaderPipeline)
@@ -2877,6 +2901,10 @@ FShaderPipelineRef FMaterial::GetShaderPipeline(class FShaderPipelineType* Shade
 	}
 
 	return FShaderPipelineRef(ShaderPipeline, *RenderingThreadShaderMap);
+#else
+	ensure(false);
+	return FShaderPipelineRef(nullptr, *RenderingThreadShaderMap);
+#endif
 }
 
 #if WITH_EDITOR
@@ -3682,7 +3710,12 @@ static void AddSortedShaderPipeline(TArray<const FShaderPipelineType*>& Pipeline
 	}
 }
 
-void FMaterial::GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPlatformTypeLayoutParameters& LayoutParams, TArray<FShaderType*>& OutShaderTypes, TArray<const FShaderPipelineType*>& OutShaderPipelineTypes, TArray<FVertexFactoryType*>& OutVFTypes) const
+void FMaterial::GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPlatformTypeLayoutParameters& LayoutParams, TArray<FShaderType*>& OutShaderTypes, TArray<const FShaderPipelineType*>& OutShaderPipelineTypes,
+#if !ENABLE_TANGRAM
+	TArray<FVertexFactoryType*>& OutVFTypes) const
+#else
+	TArray<FTanGramVertexAttributeType*>& OutTVATypes) const
+#endif
 {
 	const FMaterialShaderParameters MaterialParameters(this);
 	const FMaterialShaderMapLayout& Layout = AcquireMaterialShaderMapLayout(Platform, GetShaderPermutationFlags(LayoutParams), MaterialParameters);
@@ -3706,7 +3739,7 @@ void FMaterial::GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPl
 			}
 		}
 	}
-
+#if !ENABLE_TANGRAM
 	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
 	{
 		bool bIncludeVertexFactory = false;
@@ -3738,6 +3771,35 @@ void FMaterial::GetDependentShaderAndVFTypes(EShaderPlatform Platform, const FPl
 			OutVFTypes.Add(MeshLayout.VertexFactoryType);
 		}
 	}
+#else
+	UE_LOG(LogTanGram,Warning,TEXT("FMaterial::GetDependentShaderAndVFTypes ShouldCache Function Always return true"));
+	
+	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
+	{
+		bool bIncludeVertexFactory = false;
+		for (const FShaderLayoutEntry& Shader : MeshLayout.Shaders)
+		{
+			bIncludeVertexFactory = true;
+			AddSortedShader(OutShaderTypes, Shader.ShaderType);
+		}
+	
+		for (const FShaderPipelineType* Pipeline : MeshLayout.ShaderPipelines)
+		{
+			bIncludeVertexFactory = true;
+			AddSortedShaderPipeline(OutShaderPipelineTypes, Pipeline);
+			for (const FShaderType* Type : Pipeline->GetStages())
+			{
+				AddSortedShader(OutShaderTypes, (FShaderType*)Type);
+			}
+		}
+	
+		if (bIncludeVertexFactory)
+		{
+			// Vertex factories are already sorted
+			OutTVATypes.Add(MeshLayout.TanGramVertexAttributeType);
+		}
+	}
+#endif
 }
 
 void FMaterial::GetReferencedTexturesHash(EShaderPlatform Platform, FSHAHash& OutHash) const
@@ -3937,11 +3999,14 @@ void FMaterial::GetShaderTypes(EShaderPlatform Platform, const FPlatformTypeLayo
 	const FMaterialShaderParameters MaterialParameters(this);
 	const FMaterialShaderMapLayout& Layout = AcquireMaterialShaderMapLayout(Platform, GetShaderPermutationFlags(LayoutParams), MaterialParameters);
 	GetShaderTypesForLayout(Platform, Layout, nullptr, OutShaderInfo);
-
+#if !ENABLE_TANGRAM
 	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
 	{
 		GetShaderTypesForLayout(Platform, MeshLayout, MeshLayout.VertexFactoryType, OutShaderInfo);
 	}
+#else
+	ensure(false);
+#endif
 }
 #endif
 

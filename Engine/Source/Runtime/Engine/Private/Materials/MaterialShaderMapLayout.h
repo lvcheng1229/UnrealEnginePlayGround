@@ -33,9 +33,18 @@ public:
 class FMeshMaterialShaderMapLayout : public FShaderMapLayout
 {
 public:
-	explicit FMeshMaterialShaderMapLayout(FVertexFactoryType* InVertexFactoryType) : VertexFactoryType(InVertexFactoryType) {}
-
+#if !ENABLE_TANGRAM
+	explicit FMeshMaterialShaderMapLayout(FVertexFactoryType* InVertexFactoryType) :
+	VertexFactoryType(InVertexFactoryType)
+	{}
 	FVertexFactoryType* VertexFactoryType;
+#else	
+	explicit FMeshMaterialShaderMapLayout(FTanGramVertexAttributeType* TanGramVertexAttributeType) :
+	TanGramVertexAttributeType(TanGramVertexAttributeType)
+	{}
+
+	FTanGramVertexAttributeType* TanGramVertexAttributeType;
+#endif	
 };
 
 class FMaterialShaderMapLayout : public FShaderMapLayout

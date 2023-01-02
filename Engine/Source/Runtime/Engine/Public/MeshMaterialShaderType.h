@@ -85,7 +85,11 @@ public:
 		EShaderPermutationFlags PermutationFlags,
 		const FMaterial* Material,
 		FSharedShaderCompilerEnvironment* MaterialEnvironment,
+#if !ENABLE_TANGRAM
 		const FVertexFactoryType* VertexFactoryType,
+#else
+		const FTanGramVertexAttributeType* TanGramVertexAttributeType,
+#endif
 		TArray<TRefCountPtr<FShaderCommonCompileJob>>& NewJobs,
 		const TCHAR* DebugDescription,
 		const TCHAR* DebugExtension
@@ -99,7 +103,11 @@ public:
 		EShaderPermutationFlags PermutationFlags,
 		const FMaterial* Material,
 		FSharedShaderCompilerEnvironment* MaterialEnvironment,
+#if !ENABLE_TANGRAM
 		const FVertexFactoryType* VertexFactoryType,
+#else
+		const FTanGramVertexAttributeType* TanGramVertexAttributeType,
+#endif
 		const FShaderPipelineType* ShaderPipeline,
 		TArray<TRefCountPtr<FShaderCommonCompileJob>>& NewJobs,
 		const TCHAR* DebugDescription,

@@ -7,8 +7,36 @@
 #include "ShaderCompilerCore.h"
 #include "RenderUtils.h"
 
+static TArray<FTanGramVertexAttributeType*>& GetSortedMaterialVertexFactoryTypes()
+{
+	static TArray<FTanGramVertexAttributeType*> Types;
+	return Types;
+}
+
+const FSHAHash& FTanGramVertexAttributeType::GetSourceHash(EShaderPlatform ShaderPlatform) const
+{
+	return GetShaderFileHash(GetShaderFilename(), ShaderPlatform);
+}
+
+const TArray<FTanGramVertexAttributeType*>& FTanGramVertexAttributeType::GetSortedMaterialTypes()
+{
+	return GetSortedMaterialVertexFactoryTypes();
+}
+
+FTanGramVertexAttributeType::FTanGramVertexAttributeType(const TCHAR* InName, const TCHAR* InShaderFilename)
+	:Name(InName),
+	ShaderFilename(InShaderFilename),
+	TypeName(InName),
+	HashedName(TypeName)
+{
+	check(CheckVirtualShaderFilePath(InShaderFilename));
+	checkf(FPaths::GetExtension(InShaderFilename) == TEXT("ush"),TEXT("Incorrect virtual shader path extension for vertex factory shader header '%s': Only .ush files should be included."),InShaderFilename);
+}
+
+
+
 void FTanGramVertexAttribute::InitDeclaration(const FVertexDeclarationElementList& Elements,
-	EVertexInputStreamType StreamType)
+                                              EVertexInputStreamType StreamType)
 {
 	if (StreamType == EVertexInputStreamType::PositionOnly)
 	{

@@ -33,8 +33,11 @@ static void PrepareMeshMaterialShaderCompileJob(EShaderPlatform Platform,
 {
 	const FShaderCompileJobKey& Key = NewJob->Key;
 	const FMeshMaterialShaderType* ShaderType = Key.ShaderType->AsMeshMaterialShaderType();
+#if !ENABLE_TANGRAM
 	const FVertexFactoryType* VertexFactoryType = Key.VFType;
-
+#else
+	const FTanGramVertexAttributeType* TanGramVertexAttributeType = Key.TVAType;
+#endif
 	NewJob->Input.SharedEnvironment = MaterialEnvironment;
 	FShaderCompilerEnvironment& ShaderEnvironment = NewJob->Input.Environment;
 	ShaderEnvironment.TargetPlatform = MaterialEnvironment->TargetPlatform;
@@ -43,10 +46,13 @@ static void PrepareMeshMaterialShaderCompileJob(EShaderPlatform Platform,
 
 	const FMaterialShaderParameters MaterialParameters(Material);
 
+#if !ENABLE_TANGRAM
 	// apply the vertex factory changes to the compile environment
 	check(VertexFactoryType);
 	VertexFactoryType->ModifyCompilationEnvironment(FVertexFactoryShaderPermutationParameters(Platform, MaterialParameters, VertexFactoryType, ShaderType, PermutationFlags), ShaderEnvironment);
-
+#else
+	UE_LOG(LogTanGram,Warning,TEXT("PrepareMeshMaterialShaderCompileJob ModifyCompilationEnvironment"));
+#endif
 	Material->SetupExtaCompilationSettings(Platform, NewJob->Input.ExtraSettings);
 
 	//update material shader stats
@@ -55,15 +61,22 @@ static void PrepareMeshMaterialShaderCompileJob(EShaderPlatform Platform,
 	UE_LOG(LogShaders, Verbose, TEXT("			%s"), ShaderType->GetName());
 	COOK_STAT(MaterialMeshCookStats::ShadersCompiled++);
 
+#if !ENABLE_TANGRAM
 	// Allow the shader type to modify the compile environment.
 	ShaderType->SetupCompileEnvironment(Platform, MaterialParameters, VertexFactoryType, Key.PermutationId, PermutationFlags, ShaderEnvironment);
-
+#else
+	ShaderType->SetupCompileEnvironment(Platform, MaterialParameters, nullptr, Key.PermutationId, PermutationFlags, ShaderEnvironment);
+#endif
 	bool bAllowDevelopmentShaderCompile = Material->GetAllowDevelopmentShaderCompile();
 
 	// Compile the shader environment passed in with the shader type's source code.
 	::GlobalBeginCompileShader(
 		Material->GetFriendlyName(),
+#if !ENABLE_TANGRAM
 		VertexFactoryType,
+#else
+		TanGramVertexAttributeType,
+#endif
 		ShaderType,
 		ShaderPipeline,
 		Key.PermutationId,
@@ -92,12 +105,20 @@ void FMeshMaterialShaderType::BeginCompileShader(
 	EShaderPermutationFlags PermutationFlags,
 	const FMaterial* Material,
 	FSharedShaderCompilerEnvironment* MaterialEnvironment,
-	const FVertexFactoryType* VertexFactoryType,
+#if !ENABLE_TANGRAM
+		const FVertexFactoryType* VertexFactoryType,
+#else
+		const FTanGramVertexAttributeType* TanGramVertexAttributeType,
+#endif
 	TArray<FShaderCommonCompileJobPtr>& NewJobs,
 	const TCHAR* DebugDescription,
 	const TCHAR* DebugExtension) const
 {
+#if !ENABLE_TANGRAM
 	FShaderCompileJob* NewJob = GShaderCompilingManager->PrepareShaderCompileJob(ShaderMapId, FShaderCompileJobKey(this, VertexFactoryType, PermutationId), Priority);
+#else
+	FShaderCompileJob* NewJob = GShaderCompilingManager->PrepareShaderCompileJob(ShaderMapId, FShaderCompileJobKey(this, TanGramVertexAttributeType, PermutationId), Priority);
+#endif
 	if (NewJob)
 	{
 		PrepareMeshMaterialShaderCompileJob(Platform, PermutationFlags, Material, MaterialEnvironment, nullptr, DebugDescription, DebugExtension, NewJob);
@@ -113,7 +134,11 @@ void FMeshMaterialShaderType::BeginCompileShaderPipeline(
 	EShaderPermutationFlags PermutationFlags,
 	const FMaterial* Material,
 	FSharedShaderCompilerEnvironment* MaterialEnvironment,
-	const FVertexFactoryType* VertexFactoryType,
+#if !ENABLE_TANGRAM
+		const FVertexFactoryType* VertexFactoryType,
+#else
+		const FTanGramVertexAttributeType* TanGramVertexAttributeType,
+#endif
 	const FShaderPipelineType* ShaderPipeline,
 	TArray<FShaderCommonCompileJobPtr>& NewJobs,
 	const TCHAR* DebugDescription,
@@ -123,7 +148,12 @@ void FMeshMaterialShaderType::BeginCompileShaderPipeline(
 	UE_LOG(LogShaders, Verbose, TEXT("	Pipeline: %s"), ShaderPipeline->GetName());
 
 	// Add all the jobs as individual first, then add the dependencies into a pipeline job
+#if !ENABLE_TANGRAM
 	auto* NewPipelineJob = GShaderCompilingManager->PreparePipelineCompileJob(ShaderMapId, FShaderPipelineCompileJobKey(ShaderPipeline, VertexFactoryType, PermutationId), Priority);
+#else
+	auto* NewPipelineJob = GShaderCompilingManager->PreparePipelineCompileJob(ShaderMapId, FShaderPipelineCompileJobKey(ShaderPipeline, TanGramVertexAttributeType, PermutationId), Priority);
+#endif
+	
 	if (NewPipelineJob)
 	{
 		for (FShaderCompileJob* StageJob : NewPipelineJob->StageJobs)
@@ -142,10 +172,17 @@ static inline FString GetJobName(const FShaderCompileJob* SingleJob, const FShad
 	{
 		String += FString::Printf(TEXT(" Pipeline '%s'"), ShaderPipelineType->GetName());
 	}
+#if !ENABLE_TANGRAM
 	if (SingleJob->Key.VFType)
 	{
 		String += FString::Printf(TEXT(" VF '%s'"), SingleJob->Key.VFType->GetName());
 	}
+#else
+	if (SingleJob->Key.TVAType)
+	{
+		String += FString::Printf(TEXT(" VF '%s'"), SingleJob->Key.TVAType->GetName());
+	}
+#endif
 	String += FString::Printf(TEXT(" Type '%s'"), SingleJob->Key.ShaderType->GetName());
 	String += FString::Printf(TEXT(" '%s' Entry '%s' Permutation %i %s"), *SingleJob->Input.VirtualSourceFilePath, *SingleJob->Input.EntryPointName, SingleJob->Key.PermutationId, *InDebugDescription);
 	return String;
@@ -164,17 +201,27 @@ FShader* FMeshMaterialShaderType::FinishCompileShader(
 	const FString& InDebugDescription) const
 {
 	checkf(CurrentJob.bSucceeded, TEXT("Failed MeshMaterialType compilation job: %s"), *GetJobName(&CurrentJob, ShaderPipelineType, InDebugDescription));
+#if !ENABLE_TANGRAM
 	checkf(CurrentJob.Key.VFType, TEXT("No VF on MeshMaterialType compilation job: %s"), *GetJobName(&CurrentJob, ShaderPipelineType, InDebugDescription));
-
+#else
+	checkf(CurrentJob.Key.TVAType, TEXT("No VA on MeshMaterialType compilation job: %s"), *GetJobName(&CurrentJob, ShaderPipelineType, InDebugDescription));
+#endif
 	if (ShaderPipelineType && !ShaderPipelineType->ShouldOptimizeUnusedOutputs(CurrentJob.Input.Target.GetPlatform()))
 	{
 		// If sharing shaders in this pipeline, remove it from the type/id so it uses the one in the shared shadermap list
 		ShaderPipelineType = nullptr;
 	}
 
-	FShader* Shader = ConstructCompiled(CompiledShaderInitializerType(this, CurrentJob.Key.PermutationId, CurrentJob.Output, UniformExpressionSet, MaterialShaderMapHash, InDebugDescription, ShaderPipelineType, CurrentJob.Key.VFType));
+#if !ENABLE_TANGRAM
+	FShader* Shader = ConstructCompiled(CompiledShaderInitializerType(
+		this, CurrentJob.Key.PermutationId, CurrentJob.Output, UniformExpressionSet, MaterialShaderMapHash, InDebugDescription, ShaderPipelineType, CurrentJob.Key.VFType));
 	CurrentJob.Output.ParameterMap.VerifyBindingsAreComplete(GetName(), CurrentJob.Output.Target, CurrentJob.Key.VFType);
-
+#else
+	UE_LOG(LogTanGram,Warning,TEXT("FMeshMaterialShaderType::FinishCompileShader ConstructCompiled nullptr VF"));
+	FShader* Shader = ConstructCompiled(CompiledShaderInitializerType(
+	this, CurrentJob.Key.PermutationId, CurrentJob.Output, UniformExpressionSet, MaterialShaderMapHash, InDebugDescription, ShaderPipelineType, nullptr));
+	CurrentJob.Output.ParameterMap.VerifyBindingsAreComplete(GetName(), CurrentJob.Output.Target, nullptr);
+#endif
 	return Shader;
 }
 

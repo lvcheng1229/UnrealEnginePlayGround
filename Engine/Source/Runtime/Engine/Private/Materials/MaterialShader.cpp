@@ -1093,7 +1093,13 @@ void FMaterialShaderMapId::AppendKeyString(FString& KeyString) const
 #endif // WITH_EDITOR
 
 #if WITH_EDITOR
-void FMaterialShaderMapId::SetShaderDependencies(const TArray<FShaderType*>& ShaderTypes, const TArray<const FShaderPipelineType*>& ShaderPipelineTypes, const TArray<FVertexFactoryType*>& VFTypes, EShaderPlatform ShaderPlatform)
+void FMaterialShaderMapId::SetShaderDependencies(const TArray<FShaderType*>& ShaderTypes, const TArray<const FShaderPipelineType*>& ShaderPipelineTypes,
+#if !ENABLE_TANGRAM
+	const TArray<FVertexFactoryType*>& VFTypes,
+#else
+	const TArray<FTanGramVertexAttributeType*>& TVATypes,
+#endif
+	EShaderPlatform ShaderPlatform)
 {
 	if (!FPlatformProperties::RequiresCookedData() && AllowShaderCompiling())
 	{
@@ -1104,7 +1110,7 @@ void FMaterialShaderMapId::SetShaderDependencies(const TArray<FShaderType*>& Sha
 			Dependency.SourceHash = ShaderTypes[ShaderTypeIndex]->GetSourceHash(ShaderPlatform);
 			ShaderTypeDependencies.Add(Dependency);
 		}
-
+#if !ENABLE_TANGRAM
 		for (int32 VFTypeIndex = 0; VFTypeIndex < VFTypes.Num(); VFTypeIndex++)
 		{
 			FVertexFactoryTypeDependency Dependency;
@@ -1112,7 +1118,15 @@ void FMaterialShaderMapId::SetShaderDependencies(const TArray<FShaderType*>& Sha
 			Dependency.VFSourceHash = VFTypes[VFTypeIndex]->GetSourceHash(ShaderPlatform);
 			VertexFactoryTypeDependencies.Add(Dependency);
 		}
-
+#else
+		for (int32 TVATypeIndex = 0; TVATypeIndex < TVATypes.Num(); TVATypeIndex++)
+		{
+			FVertexFactoryTypeDependency Dependency;
+			Dependency.VertexFactoryTypeName = TVATypes[TVATypeIndex]->GetHashedName();
+			Dependency.VFSourceHash = TVATypes[TVATypeIndex]->GetSourceHash(ShaderPlatform);
+			VertexFactoryTypeDependencies.Add(Dependency);
+		}
+#endif
 		for (int32 TypeIndex = 0; TypeIndex < ShaderPipelineTypes.Num(); TypeIndex++)
 		{
 			const FShaderPipelineType* Pipeline = ShaderPipelineTypes[TypeIndex];
@@ -1242,8 +1256,11 @@ FShader* FMaterialShaderType::FinishCompileShader(
 	}
 
 	FShader* Shader = ConstructCompiled(CompiledShaderInitializerType(this, CurrentJob.Key.PermutationId, CurrentJob.Output, UniformExpressionSet, MaterialShaderMapHash, ShaderPipelineType, nullptr, InDebugDescription));
+#if !ENABLE_TANGRAM;
 	CurrentJob.Output.ParameterMap.VerifyBindingsAreComplete(GetName(), CurrentJob.Output.Target, CurrentJob.Key.VFType);
-
+#else
+	CurrentJob.Output.ParameterMap.VerifyBindingsAreComplete(GetName(), CurrentJob.Output.Target, nullptr);
+#endif
 	return Shader;
 }
 
@@ -1718,6 +1735,7 @@ void FMaterialShaderMap::SubmitCompileJobs(uint32 CompilingShaderMapId,
 #endif
 
 	// Iterate over all vertex factory types.
+#if !ENABLE_TANGRAM
 	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
 	{
 		const FMeshMaterialShaderMap* MeshShaderMap = GetMeshShaderMap(MeshLayout.VertexFactoryType);
@@ -1830,7 +1848,104 @@ void FMaterialShaderMap::SubmitCompileJobs(uint32 CompilingShaderMapId,
 			NumVertexFactories++;
 		}
 	}
+#else
+	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
+	{
+		const FMeshMaterialShaderMap* MeshShaderMap = GetMeshShaderMap(MeshLayout.TanGramVertexAttributeType);
+	
+		uint32 NumShadersPerVF = 0;
+		TSet<FString> ShaderTypeNames;
+	
+		// Do not submit jobs for the shader types that are included in some pipeline stages if that pipeline is optimzing unused outputs.
+		// In such a case, these shaders should not be used runtime anymore
+		FPipelinedShaderFilter PipelinedShaderFilter(ShaderPlatform, MeshLayout.ShaderPipelines);
+	
+		// Iterate over all mesh material shader types.
+		TMap<TShaderTypePermutation<const FShaderType>, FShaderCompileJob*> SharedShaderJobs;
+		for (const FShaderLayoutEntry& Shader : MeshLayout.Shaders)
+		{
+			FMeshMaterialShaderType* ShaderType = static_cast<FMeshMaterialShaderType*>(Shader.ShaderType);
+			UE_LOG(LogTanGram, Warning, TEXT("FMaterialShaderMap::SubmitCompileJobs ShouldCache always return true"));
+	
+			NumShadersPerVF++;
+			// only compile the shader if we don't already have it and it is not a pipelined one
+			if (!PipelinedShaderFilter.IsPipelinedType(ShaderType) && (!MeshShaderMap || !MeshShaderMap->HasShader(ShaderType, Shader.PermutationId)))
+			{
+				// Compile this mesh material shader for this material and vertex factory type.
+				ShaderType->BeginCompileShader(InPriority,
+					CompilingShaderMapId,
+					Shader.PermutationId,
+					ShaderPlatform,
+					LocalPermutationFlags,
+					Material,
+					MaterialEnvironment,
+					MeshLayout.TanGramVertexAttributeType,
+					CompileJobs,
+					DebugDescription,
+					DebugExtension
+				);
+				//TShaderTypePermutation<const FShaderType> ShaderTypePermutation(ShaderType, Shader.PermutationId);
+				//check(!SharedShaderJobs.Find(ShaderTypePermutation));
+				//SharedShaderJobs.Add(ShaderTypePermutation, Job);
+			}
+		}
+	
+		// Now the pipeline jobs; if it's a shareable pipeline, do not add duplicate jobs
+		for (FShaderPipelineType* Pipeline : MeshLayout.ShaderPipelines)
+		{
+			UE_LOG(LogTanGram, Warning, TEXT("FMaterialShaderMap::SubmitCompileJobs ShouldCachePipeline always return true"));
+	
+			auto& StageTypes = Pipeline->GetStages();
 
+			if (Pipeline->ShouldOptimizeUnusedOutputs(ShaderPlatform))
+			{
+				NumShadersPerVF += StageTypes.Num();
+	#if WITH_EDITOR
+				for (auto* ShaderType : StageTypes)
+				{
+					// Verify that the shader map Id contains inputs for any shaders that will be put into this shader map
+					check(ShaderMapId.ContainsShaderType(ShaderType, kUniqueShaderPermutationId));
+				}
+	#endif
+				// Make a pipeline job with all the stages
+				FMeshMaterialShaderType::BeginCompileShaderPipeline(InPriority,
+					CompilingShaderMapId,
+					kUniqueShaderPermutationId,
+					ShaderPlatform,
+					LocalPermutationFlags,
+					Material,
+					MaterialEnvironment,
+					MeshLayout.TanGramVertexAttributeType,
+					Pipeline,
+					CompileJobs,
+					DebugDescription,
+					DebugExtension);
+			}
+			else
+			{
+				// If sharing shaders amongst pipelines, add this pipeline as a dependency of an existing job
+				for (const FShaderType* ShaderType : StageTypes)
+				{
+					TShaderTypePermutation<const FShaderType> ShaderTypePermutation(ShaderType, kUniqueShaderPermutationId);
+					FShaderCompileJob** Job = SharedShaderJobs.Find(ShaderTypePermutation);
+					checkf(Job, TEXT("Couldn't find existing shared job for mesh shader %s on pipeline %s!"), ShaderType->GetName(), Pipeline->GetName());
+					auto* SingleJob = (*Job)->GetSingleShaderJob();
+					auto& PipelinesToShare = SingleJob->SharingPipelines.FindOrAdd(MeshLayout.TanGramVertexAttributeType);
+					check(!PipelinesToShare.Contains(Pipeline));
+					PipelinesToShare.Add(Pipeline);
+				}
+			}
+		}
+	
+		NumShaders += NumShadersPerVF;
+		if (NumShadersPerVF > 0)
+		{
+			UE_LOG(LogShaders, Verbose, TEXT("			%s - %u shaders"), MeshLayout.TanGramVertexAttributeType->GetName(), NumShadersPerVF);
+			NumVertexFactories++;
+		}
+	}
+	ensure(false);
+#endif
 	// Do not submit jobs for the shader types that are included in some pipeline stages if that pipeline is optimzing unused outputs.
 	// In such a case, these shaders should not be used runtime anymore
 	FPipelinedShaderFilter PipelinedShaderFilter(ShaderPlatform, Layout.ShaderPipelines);
@@ -2327,6 +2442,7 @@ private:
 			}
 		}
 
+#if !ENABLE_TANGRAM
 		for (FVertexFactoryType* VertexFactoryType : FVertexFactoryType::GetSortedMaterialTypes())
 		{
 			FMeshMaterialShaderMapLayout* MeshLayout = nullptr;
@@ -2381,7 +2497,33 @@ private:
 				}
 			}
 		}
+#else
+		for(FTanGramVertexAttributeType* TanGramVertexAttributeType : FTanGramVertexAttributeType::GetSortedMaterialTypes())
+		{
+			FMeshMaterialShaderMapLayout* MeshLayout = nullptr;
+			for (FShaderType* BaseShaderType : SortedMeshMaterialShaderTypes)
+			{
+				FMeshMaterialShaderType* ShaderType = static_cast<FMeshMaterialShaderType*>(BaseShaderType);
 
+				const int32 PermutationCount = ShaderType->GetPermutationCount();
+				for (int32 PermutationId = 0; PermutationId < PermutationCount; ++PermutationId)
+				{
+					if (ShaderType->ShouldCompilePermutation(Platform, MaterialParameters, nullptr, PermutationId, Flags))
+					{
+						if (!MeshLayout)
+						{
+							MeshLayout = new(Layout.MeshShaderMaps) FMeshMaterialShaderMapLayout(TanGramVertexAttributeType);
+						}
+						MeshLayout->Shaders.Add(FShaderLayoutEntry(ShaderType, PermutationId));
+
+						const FHashedName& TypeName = ShaderType->GetHashedName();
+						Hasher.Update((uint8*)&TypeName, sizeof(TypeName));
+						Hasher.Update((uint8*)&PermutationId, sizeof(PermutationId));
+					}
+				}
+			}
+		}
+#endif	
 		Hasher.Final();
 		Hasher.GetHash(Layout.ShaderMapHash.Hash);
 	}
@@ -2448,7 +2590,7 @@ bool FMaterialShaderMap::IsComplete(const FMaterial* Material, bool bSilent)
 			}
 		}
 	}
-
+#if! ENABLE_TANGRAM
 	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
 	{
 		FPipelinedShaderFilter PipelinedShaderFilter(Platform, MeshLayout.ShaderPipelines);
@@ -2498,7 +2640,59 @@ bool FMaterialShaderMap::IsComplete(const FMaterial* Material, bool bSilent)
 			}
 		}
 	}
+#else
+	for (const FMeshMaterialShaderMapLayout& MeshLayout : Layout.MeshShaderMaps)
+	{
+		FPipelinedShaderFilter PipelinedShaderFilter(Platform, MeshLayout.ShaderPipelines);
+		const FMeshMaterialShaderMap* MeshShaderMap = LocalContent->GetMeshShaderMap(MeshLayout.TanGramVertexAttributeType->GetHashedName());
 
+		for (const FShaderLayoutEntry& Shader : MeshLayout.Shaders)
+		{
+			//if (Material->ShouldCache(Platform, Shader.ShaderType, MeshLayout.VertexFactoryType))
+			UE_LOG(LogTanGram, Warning, TEXT("FMaterialShaderMap::IsComplete ShouldCache always return true"));
+			{
+				if (!PipelinedShaderFilter.IsPipelinedType(Shader.ShaderType) && (!MeshShaderMap || !MeshShaderMap->HasShader(Shader.ShaderType, Shader.PermutationId)))
+				{
+					if (!bSilent)
+					{
+						if (!MeshShaderMap)
+						{
+							UE_LOG(LogMaterial, Warning, TEXT("Incomplete material %s, missing Vertex Factory %s."), *Material->GetFriendlyName(), MeshLayout.TanGramVertexAttributeType->GetName());
+						}
+						else
+						{
+							UE_LOG(LogMaterial, Warning, TEXT("Incomplete material %s, missing (%s, %d) from %s."), *Material->GetFriendlyName(), Shader.ShaderType->GetName(), Shader.PermutationId, MeshLayout.TanGramVertexAttributeType->GetName());
+						}
+					}
+					return false;
+				}
+			}
+		}
+
+		for (const FShaderPipelineType* Pipeline : MeshLayout.ShaderPipelines)
+		{
+			if (!MeshShaderMap || !MeshShaderMap->HasShaderPipeline(Pipeline))
+			{
+				//if (Material->ShouldCachePipeline(Platform, Pipeline, MeshLayout.VertexFactoryType))
+				UE_LOG(LogTanGram, Warning, TEXT("FMaterialShaderMap::IsComplete ShouldCachePipeline always return true"));
+				{
+					if (!bSilent)
+					{
+						if (!MeshShaderMap)
+						{
+							UE_LOG(LogMaterial, Warning, TEXT("Incomplete material %s, missing Vertex Factory %s."), *Material->GetFriendlyName(), MeshLayout.TanGramVertexAttributeType->GetName());
+						}
+						else
+						{
+							UE_LOG(LogMaterial, Warning, TEXT("Incomplete material %s, missing pipeline %s from %s."), *Material->GetFriendlyName(), Pipeline->GetName(), MeshLayout.TanGramVertexAttributeType->GetName());
+						}
+					}
+					return false;
+				}
+			}
+		}
+	}
+#endif
 	// Was missing some shaders from the initial layout, but all of those shaders were explicitly exluced by our FMaterial::ShouldCache implementation
 	return true;
 }

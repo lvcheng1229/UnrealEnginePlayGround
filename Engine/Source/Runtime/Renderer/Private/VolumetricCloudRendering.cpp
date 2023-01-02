@@ -2068,6 +2068,7 @@ static void GetOutputTexturesWithFallback(FRDGBuilder& GraphBuilder, FCloudRende
 
 void FSceneRenderer::RenderVolumetricCloudsInternal(FRDGBuilder& GraphBuilder, FCloudRenderContext& CloudRC, FInstanceCullingManager& InstanceCullingManager)
 {
+#if !ENABLE_TANGRAM
 	check(CloudRC.MainView);
 	check(CloudRC.CloudInfo);
 	check(CloudRC.CloudVolumeMaterialProxy);
@@ -2196,6 +2197,9 @@ void FSceneRenderer::RenderVolumetricCloudsInternal(FRDGBuilder& GraphBuilder, F
 					});
 			});
 	}
+#else
+	ensure(false);
+#endif
 }
 
 bool FSceneRenderer::RenderVolumetricCloud(

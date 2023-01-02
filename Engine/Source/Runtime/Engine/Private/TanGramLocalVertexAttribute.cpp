@@ -9,7 +9,10 @@
  * Default : Position Attribute 0 / TangentX Attribute 1 /Tangent Z Attribute 2 / Texture Coord 0 - 4 : Attribute 4 - 8
  */
 
-
+FTanGramVertexAttributeType* FTanGramLocalVertexAttribute::GetType() const
+{
+	return nullptr;
+}
 
 void FTanGramLocalVertexAttribute::InitRHI()
 {

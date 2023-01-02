@@ -275,7 +275,11 @@ FShaderPipelineCompileJob::FShaderPipelineCompileJob(uint32 InHash, uint32 InId,
 	StageJobs.Empty(Stages.Num());
 	for (const FShaderType* ShaderType : Stages)
 	{
+#if !ENABLE_TANGRAM
 		const FShaderCompileJobKey StageKey(ShaderType, InKey.VFType, InKey.PermutationId);
+#else
+		const FShaderCompileJobKey StageKey(ShaderType, InKey.TVAType, InKey.PermutationId);
+#endif
 		StageJobs.Add(new FShaderCompileJob(StageKey.MakeHash(InId), InId, InPriroity, StageKey));
 	}
 }
@@ -1473,12 +1477,20 @@ static void ProcessErrors(const FShaderCompileJob& CurrentJob, TArray<FString>& 
 				// Only the shader's main file is passed through memory without a filename
 				CurrentError.ErrorVirtualFilePath = FString(CurrentJob.Key.ShaderType->GetShaderFilename());
 			}
+#if !ENABLE_TANGRAM
 			else if (CurrentError.ErrorVirtualFilePath == TEXT("/Engine/Generated/VertexFactory.ush"))
 			{
 				// VertexFactory.usf is dynamically included from whichever vertex factory the shader was compiled with.
 				check(CurrentJob.Key.VFType);
 				CurrentError.ErrorVirtualFilePath = FString(CurrentJob.Key.VFType->GetShaderFilename());
 			}
+#else	
+			else if (CurrentError.ErrorVirtualFilePath == TEXT("/Engine/Generated/TanGramVertexAttribute.ush"))
+			{
+				check(CurrentJob.Key.TVAType);
+				CurrentError.ErrorVirtualFilePath = FString(CurrentJob.Key.TVAType->GetShaderFilename());
+			}
+#endif
 			else if (CurrentError.ErrorVirtualFilePath == TEXT("") && CurrentJob.Key.ShaderType)
 			{
 				// Some shader compiler errors won't have a file and line number, so we just assume the error happened in file containing the entrypoint function.
@@ -1504,7 +1516,11 @@ static void ProcessErrors(const FShaderCompileJob& CurrentJob, TArray<FString>& 
 					*CurrentError.ErrorLineString,
 					CurrentJob.Key.ShaderType->GetName(),
 					CurrentJob.Key.PermutationId,
+#if !ENABLE_TANGRAM
 					CurrentJob.Key.VFType ? CurrentJob.Key.VFType->GetName() : TEXT("None"));
+#else
+				CurrentJob.Key.TVAType ? CurrentJob.Key.TVAType->GetName() : TEXT("None"));
+#endif
 			}
 			else
 			{
@@ -1574,10 +1590,17 @@ static FString GetSingleJobCompilationDump(const FShaderCompileJob* SingleJob)
 		return TEXT("Internal error, not a Job!");
 	}
 	FString String = SingleJob->Input.GenerateShaderName();
+#if !ENABLE_TANGRAM
 	if (SingleJob->Key.VFType)
 	{
 		String += FString::Printf(TEXT(" VF '%s'"), SingleJob->Key.VFType->GetName());
 	}
+#else
+	if (SingleJob->Key.TVAType)
+	{
+		String += FString::Printf(TEXT(" TVA '%s'"), SingleJob->Key.TVAType->GetName());
+	}
+#endif
 	String += FString::Printf(TEXT(" Type '%s'"), SingleJob->Key.ShaderType->GetName());
 	String += FString::Printf(TEXT(" '%s' Entry '%s' Permutation %i "), *SingleJob->Input.VirtualSourceFilePath, *SingleJob->Input.EntryPointName, SingleJob->Key.PermutationId);
 	return String;
@@ -5252,7 +5275,11 @@ void GlobalBeginCompileShader(
 
 void GlobalBeginCompileShader(
 	const FString& DebugGroupName,
-	const FVertexFactoryType* VFType,
+#if !ENABLE_TANGRAM
+	const class FVertexFactoryType* VFType,
+#else
+	const class FTanGramVertexAttributeType* TVATypes,
+#endif
 	const FShaderType* ShaderType,
 	const FShaderPipelineType* ShaderPipelineType,
 	int32 PermutationId,
@@ -5317,10 +5344,15 @@ void GlobalBeginCompileShader(
 	{
 		Input.DebugGroupName = Input.DebugGroupName / ShaderPipelineType->GetName();
 	}
-	
+#if !ENABLE_TANGRAM
 	if (VFType)
 	{
 		FString VFName = VFType->GetName();
+#else
+	if (TVATypes)
+	{
+		FString VFName = TVATypes->GetName();
+#endif
 		if (GDumpShaderDebugInfoShort)
 		{
 			// Shorten vertex factory name
