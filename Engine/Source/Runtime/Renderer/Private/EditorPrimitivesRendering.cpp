@@ -127,7 +127,7 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMes
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	const int32 NumMovablePointLights = 0;
 
-	TMeshProcessorShaders<TTanGramBasePassVS, TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>> BasePassShaders;
+	TMeshProcessorShaders<TTanGramBasePassVS, TTanGramBasePassPS> BasePassShaders;
 
 	if (!TanGram::GetShaders(
 		NumMovablePointLights,

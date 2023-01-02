@@ -1530,6 +1530,8 @@ FMeshDrawCommandPrimitiveIdInfo FMeshPassProcessor::GetDrawCommandPrimitiveId(
 	return PrimitiveIdInfo;
 }
 
+
+
 bool FMeshPassProcessor::ShouldSkipMeshDrawCommand(const FMeshBatch& RESTRICT MeshBatch, const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy) const
 {
 	bool bSkipMeshDrawCommand = false;

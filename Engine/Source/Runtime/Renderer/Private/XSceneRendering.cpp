@@ -209,24 +209,6 @@ private:
 
 ENUM_CLASS_FLAGS(FXSceneTextureExtentState::ERenderTargetHistory);
 
-//Temp !!!!!!!!!!!!!!!
-//void FXMobileSceneRenderer::UpdateSkyReflectionUniformBuffer()
-//{
-//	FSkyLightSceneProxy* SkyLight = nullptr;
-//	if (Scene->SkyLight
-//		&& Scene->SkyLight->ProcessedTexture
-//		&& Scene->SkyLight->ProcessedTexture->TextureRHI
-//		// Don't use skylight reflection if it is a static sky light for keeping coherence with PC.
-//		&& !Scene->SkyLight->bHasStaticLighting)
-//	{
-//		SkyLight = Scene->SkyLight;
-//	}
-//
-//	FMobileReflectionCaptureShaderParameters Parameters;
-//	SetupMobileSkyReflectionUniformParameters(SkyLight, Parameters);
-//	Scene->UniformBuffers.MobileSkyReflectionUniformBuffer.UpdateUniformBufferImmediate(Parameters);
-//}
-
 
 void FXMobileSceneRenderer::Render(FRDGBuilder& GraphBuilder)
 {
@@ -276,7 +258,6 @@ void FXMobileSceneRenderer::Render(FRDGBuilder& GraphBuilder)
 		FRHICommandListImmediate& RHICmdList = GraphBuilder.RHICmdList;
 		ComputeViewVisibility(RHICmdList, BasePassDepthStencilAccess, ViewCommandsPerView, DynamicIndexBuffer, DynamicVertexBuffer, DynamicReadBuffer, InstanceCullingManager);
 		SetupMobileBasePassAfterShadowInit(BasePassDepthStencilAccess, ViewCommandsPerView, InstanceCullingManager);
-		//UpdateSkyReflectionUniformBuffer();
 	}
 
 	DynamicIndexBuffer.Commit();

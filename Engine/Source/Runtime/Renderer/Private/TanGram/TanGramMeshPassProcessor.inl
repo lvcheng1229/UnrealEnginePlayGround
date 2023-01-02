@@ -1,50 +1,18 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
-/*=============================================================================
-MeshPassProcessor.inl:
-=============================================================================*/
-
-#pragma once
-
-static EVRSShadingRate GetShadingRateFromMaterial(EMaterialShadingRate MaterialShadingRate)
-{
-	if (GRHISupportsPipelineVariableRateShading && GRHIVariableRateShadingEnabled)
-	{
-		switch (MaterialShadingRate)
-		{
-		case MSR_1x2:
-			return EVRSShadingRate::VRSSR_1x2;
-		case MSR_2x1:
-			return EVRSShadingRate::VRSSR_2x1;
-		case MSR_2x2:
-			return EVRSShadingRate::VRSSR_2x2;
-		case MSR_4x2:
-			return EVRSShadingRate::VRSSR_4x2;
-		case MSR_2x4:
-			return EVRSShadingRate::VRSSR_2x4;						
-		case MSR_4x4:
-			return EVRSShadingRate::VRSSR_4x4;
-		}
-	}
-	return EVRSShadingRate::VRSSR_1x1;
-}
-
 template<typename PassShadersType, typename ShaderElementDataType>
-void FMeshPassProcessor::BuildMeshDrawCommands(
-	const FMeshBatch& RESTRICT MeshBatch,
+void FMeshPassProcessor::BuildTanGramMeshDrawCommands(
+	const FMeshBatch &RESTRICT MeshBatch,
 	uint64 BatchElementMask,
-	const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy,
-	const FMaterialRenderProxy& RESTRICT MaterialRenderProxy,
-	const FMaterial& RESTRICT MaterialResource,
-	const FMeshPassProcessorRenderState& RESTRICT DrawRenderState,
+	const FPrimitiveSceneProxy *RESTRICT PrimitiveSceneProxy,
+	const FMaterialRenderProxy &RESTRICT MaterialRenderProxy,
+	const FMaterial &RESTRICT MaterialResource,
+	const FMeshPassProcessorRenderState &RESTRICT DrawRenderState,
 	PassShadersType PassShaders,
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode,
 	FMeshDrawCommandSortKey SortKey,
 	EMeshPassFeatures MeshPassFeatures,
-	const ShaderElementDataType& ShaderElementData)
+	const ShaderElementDataType & ShaderElementData)
 {
-	
 	const FVertexFactory* RESTRICT VertexFactory = MeshBatch.VertexFactory;
 	const FPrimitiveSceneInfo* RESTRICT PrimitiveSceneInfo = PrimitiveSceneProxy ? PrimitiveSceneProxy->GetPrimitiveSceneInfo() : nullptr;
 
@@ -163,25 +131,4 @@ void FMeshPassProcessor::BuildMeshDrawCommands(
 			DrawListContext->FinalizeCommand(MeshBatch, BatchElementIndex, IdInfo, MeshFillMode, MeshCullMode, SortKey, Flags, PipelineState, &ShadersForDebugging, MeshDrawCommand);
 		}
 	}
-}
-
-/**
-* Provides a callback to build FMeshDrawCommands and then submits them immediately.  Useful for legacy / editor code paths.
-* Does many dynamic allocations - do not use for game rendering.
-*/
-template<typename LambdaType>
-void DrawDynamicMeshPass(const FSceneView& View, FRHICommandList& RHICmdList, const LambdaType& BuildPassProcessorLambda, bool bForceStereoInstancingOff = false)
-{
-	FDynamicMeshDrawCommandStorage DynamicMeshDrawCommandStorage;
-	FMeshCommandOneFrameArray VisibleMeshDrawCommands;
-	FGraphicsMinimalPipelineStateSet GraphicsMinimalPipelineStateSet;
-	bool NeedsShaderInitialisation;
-
-	FDynamicPassMeshDrawListContext DynamicMeshPassContext(DynamicMeshDrawCommandStorage, VisibleMeshDrawCommands, GraphicsMinimalPipelineStateSet, NeedsShaderInitialisation);
-
-	BuildPassProcessorLambda(&DynamicMeshPassContext);
-
-	// We assume all dynamic passes are in stereo if it is enabled in the view, so we apply ISR to them
-	const uint32 InstanceFactor = (!bForceStereoInstancingOff && View.IsInstancedStereoPass()) ? 2 : 1;
-	DrawDynamicMeshPassPrivate(View, RHICmdList, VisibleMeshDrawCommands, DynamicMeshDrawCommandStorage, GraphicsMinimalPipelineStateSet, NeedsShaderInitialisation, InstanceFactor);
 }

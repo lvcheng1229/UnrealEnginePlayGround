@@ -62,8 +62,7 @@ public:
 	{
 		const typename TTanGramBasePassVS::FPermutationDomain PermutationVector(Parameters.PermutationId);
 		PermutationVector.ModifyCompilationEnvironment(OutEnvironment);
-		TTanGramBasePassVS::ModifyCompilationEnvironment(
-			static_cast<const typename TTanGramBasePassVS::FPermutationParameters&>(Parameters), OutEnvironment);
+		TTanGramBasePassVS::ModifyCompilationEnvironment(static_cast<const typename TTanGramBasePassVS::FPermutationParameters&>(Parameters), OutEnvironment);
 	}
 	static bool ShouldCompilePermutationImpl(const FShaderPermutationParameters& Parameters)
 	{
@@ -106,62 +105,14 @@ public:
 	TTanGramBasePassVS() {}
 };
 
-template<typename LightMapPolicyType>
-class TTanGramBasePassPSPolicyParamType : public FMeshMaterialShader, public LightMapPolicyType::PixelParametersType
-{
-	DECLARE_INLINE_TYPE_LAYOUT_EXPLICIT_BASES(TTanGramBasePassPSPolicyParamType, NonVirtual, FMeshMaterialShader, typename LightMapPolicyType::PixelParametersType);
-public:
-	static bool ShouldCompilePermutation(const FMeshMaterialShaderPermutationParameters& Parameters)
-	{
-		return IsMobilePlatform(Parameters.Platform);
-	}
-	
-	static void ModifyCompilationEnvironment(const FMaterialShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
-	{
-		FMeshMaterialShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
-	}
-	
-	/** Initialization constructor. */
-	TTanGramBasePassPSPolicyParamType(const FMeshMaterialShaderType::CompiledShaderInitializerType& Initializer)
-		: FMeshMaterialShader(Initializer)
-	{
-		PassUniformBuffer.Bind(Initializer.ParameterMap, FMobileBasePassUniformParameters::StaticStructMetadata.GetShaderVariableName());
-	}
-	
-	TTanGramBasePassPSPolicyParamType() {}
-};
-
-
-template<typename LightMapPolicyType>
-class TTanGramBasePassPSBaseType : public TTanGramBasePassPSPolicyParamType<LightMapPolicyType>
-{
-	typedef TTanGramBasePassPSPolicyParamType<LightMapPolicyType> Super;
-	DECLARE_INLINE_TYPE_LAYOUT(TTanGramBasePassPSBaseType, NonVirtual);
-public:
-	static bool ShouldCompilePermutation(const FMeshMaterialShaderPermutationParameters& Parameters)
-	{
-		return Super::ShouldCompilePermutation(Parameters);
-	}
-
-	static void ModifyCompilationEnvironment(const FMaterialShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
-	{
-		Super::ModifyCompilationEnvironment(Parameters, OutEnvironment);
-	}
-
-	/** Initialization constructor. */
-	TTanGramBasePassPSBaseType(const FMeshMaterialShaderType::CompiledShaderInitializerType& Initializer) : Super(Initializer) {}
-	TTanGramBasePassPSBaseType() {}
-};
-
-template< typename LightMapPolicyType,int32 NumMovablePointLights>
-class TTanGramBasePassPS : public TTanGramBasePassPSBaseType<LightMapPolicyType>
+class TTanGramBasePassPS :  public FMeshMaterialShader
 {
 	DECLARE_SHADER_TYPE(TTanGramBasePassPS,MeshMaterial);
 public:
 
 	static bool ShouldCompilePermutation(const FMeshMaterialShaderPermutationParameters& Parameters)
 	{		
-		return TTanGramBasePassPSBaseType<LightMapPolicyType>::ShouldCompilePermutation(Parameters);
+		return true;
 	}
 	
 	static void ModifyCompilationEnvironment(const FMaterialShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
@@ -170,7 +121,7 @@ public:
 	
 	/** Initialization constructor. */
 	TTanGramBasePassPS(const ShaderMetaType::CompiledShaderInitializerType& Initializer):
-		TTanGramBasePassPSBaseType<LightMapPolicyType>(Initializer)
+		FMeshMaterialShader(Initializer)
 	{}
 
 	/** Default constructor. */
@@ -183,7 +134,7 @@ namespace TanGram
 	const FLightSceneInfo* GetDirectionalLightInfo(const FScene* Scene, const FPrimitiveSceneProxy* PrimitiveSceneProxy);
 	bool GetShaders(int32 NumMovablePointLights, const FMaterial& MaterialResource, FVertexFactoryType* VertexFactoryType,
 		TShaderRef<TTanGramBasePassVS>& VertexShader,
-		TShaderRef<TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy> >& PixelShader);
+		TShaderRef<TTanGramBasePassPS>& PixelShader);
 };
 
 

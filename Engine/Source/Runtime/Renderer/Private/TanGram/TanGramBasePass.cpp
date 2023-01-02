@@ -8,7 +8,9 @@
 #include "MaterialShaderQualitySettings.h"
 #include "PrimitiveSceneInfo.h"
 #include "MeshPassProcessor.inl"
+#include "TanGramMeshPassProcessor.inl"
 #include "Engine/TextureCube.h"
+
 const FLightSceneInfo* TanGram::GetDirectionalLightInfo(const FScene* Scene, const FPrimitiveSceneProxy* PrimitiveSceneProxy)
 {
 	const FLightSceneInfo* DirectionalLight = nullptr;
@@ -20,18 +22,14 @@ const FLightSceneInfo* TanGram::GetDirectionalLightInfo(const FScene* Scene, con
 	return DirectionalLight;
 }
 
-template <int32 NumMovablePointLights>
-bool GetUniformTanGramBasePassShaders(
-	const FMaterial& Material,
-	FVertexFactoryType* VertexFactoryType,
+bool TanGram::GetShaders(int32 NumMovablePointLights, const FMaterial& Material, FVertexFactoryType* VertexFactoryType,
 	TShaderRef<TTanGramBasePassVS>& VertexShader,
-	TShaderRef<TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>>& PixelShader
-)
+	TShaderRef<TTanGramBasePassPS>& PixelShader)
 {
 	FMaterialShaderTypes ShaderTypes;
 	ensure(IsMobileHDR());
 	ShaderTypes.AddShaderType<TTanGramBasePassVS>();
-	ShaderTypes.AddShaderType<TTanGramBasePassPS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>,NumMovablePointLights>>();
+	ShaderTypes.AddShaderType<TTanGramBasePassPS>();
 
 	FMaterialShaders Shaders;
 	if (!Material.TryGetShaders(ShaderTypes, VertexFactoryType, Shaders))
@@ -44,21 +42,6 @@ bool GetUniformTanGramBasePassShaders(
 	return true;
 }
 
-bool TanGram::GetShaders(int32 NumMovablePointLights, const FMaterial& MaterialResource, FVertexFactoryType* VertexFactoryType,
-	TShaderRef<TTanGramBasePassVS>& VertexShader,
-	TShaderRef<TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>>& PixelShader)
-{
-	switch (NumMovablePointLights)
-	{
-	case INT32_MAX:
-		return GetUniformTanGramBasePassShaders<INT32_MAX>(MaterialResource, VertexFactoryType, VertexShader, PixelShader);
-	case 0:
-	default:
-		return GetUniformTanGramBasePassShaders<0>(MaterialResource, VertexFactoryType, VertexShader, PixelShader);
-	}
-
-}
-
 FTanGramBasePassProcessor::FTanGramBasePassProcessor(
 	const FScene* Scene,
 	ERHIFeatureLevel::Type InFeatureLevel,
@@ -66,7 +49,10 @@ FTanGramBasePassProcessor::FTanGramBasePassProcessor(
 	const FMeshPassProcessorRenderState& InDrawRenderState,
 	FMeshPassDrawListContext* InDrawListContext)
 	: FMeshPassProcessor(Scene, InFeatureLevel, InViewIfDynamicMeshCommand, InDrawListContext)
-	, PassDrawRenderState(InDrawRenderState) {}
+	, PassDrawRenderState(InDrawRenderState) 
+{
+
+}
 
 void FTanGramBasePassProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBatch, uint64 BatchElementMask, const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy, int32 StaticMeshId)
 {
@@ -104,7 +90,7 @@ bool FTanGramBasePassProcessor::Process(const FMeshBatch& RESTRICT MeshBatch, ui
 	const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy, const FMaterialRenderProxy& RESTRICT MaterialRenderProxy,
 	const FMaterial& RESTRICT MaterialResource, EBlendMode BlendMode, FMaterialShadingModelField ShadingModels, const FUniformLightMapPolicy::ElementDataType& RESTRICT LightMapElementData)
 {
-	TMeshProcessorShaders<TTanGramBasePassVS, TTanGramBasePassPSPolicyParamType<FTanGramUniformLightMapPolicy>> BasePassShaders;
+	TMeshProcessorShaders<TTanGramBasePassVS, TTanGramBasePassPS> BasePassShaders;
 	
 	if (Scene && Scene->SkyLight)
 	{
@@ -147,7 +133,7 @@ bool FTanGramBasePassProcessor::Process(const FMeshBatch& RESTRICT MeshBatch, ui
 	TTanGramBasePassShaderElementData<FTanGramUniformLightMapPolicy> ShaderElementData(LightMapElementData, false);
 	ShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
 
-	BuildMeshDrawCommands(
+	BuildTanGramMeshDrawCommands(
 		MeshBatch,
 		BatchElementMask,
 		PrimitiveSceneProxy,
