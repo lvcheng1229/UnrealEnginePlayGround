@@ -434,7 +434,6 @@ bool FTranslucencyDepthPassMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -480,9 +479,7 @@ bool FTranslucencyDepthPassMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 

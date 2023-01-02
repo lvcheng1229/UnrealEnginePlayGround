@@ -376,11 +376,7 @@ public:
 						FMeshBatchElement& BatchElement = Mesh.Elements[0];
 						BatchElement.IndexBuffer = &Section->IndexBuffer;
 						Mesh.bWireframe = bWireframe;
-#if !ENABLE_TANGRAM
-						MeshBatch.VertexFactory = &Section->VertexFactory;
-#else
-						ensure(false);
-#endif
+						Mesh.VertexFactory = &Section->VertexFactory;
 						Mesh.MaterialRenderProxy = MaterialProxy;
 
 						bool bHasPrecomputedVolumetricLightmap;
@@ -487,11 +483,8 @@ public:
 
 					uint32 SectionIdx = 0;
 					FMeshBatch MeshBatch;
-#if !ENABLE_TANGRAM
+
 					MeshBatch.VertexFactory = &Section->VertexFactory;
-#else
-					ensure(false);
-#endif
 					MeshBatch.SegmentIndex = 0;
 					MeshBatch.MaterialRenderProxy = Section->Material->GetRenderProxy();
 					MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();

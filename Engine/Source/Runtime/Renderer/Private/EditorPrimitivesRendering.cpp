@@ -64,7 +64,6 @@ bool FEditorPrimitivesBasePassMeshProcessor::TryAddMeshBatch(const FMeshBatch& R
 
 bool FEditorPrimitivesBasePassMeshProcessor::ProcessDeferredShadingPath(const FMeshBatch& MeshBatch, uint64 BatchElementMask, const FMaterial& Material, const FMaterialRenderProxy& MaterialRenderProxy, const FPrimitiveSceneProxy* PrimitiveSceneProxy, int32 StaticMeshId)
 {
-#if !ENABLE_TANGRAM
 	FUniformLightMapPolicy NoLightmapPolicy(LMP_NO_LIGHTMAP);
 	typedef FUniformLightMapPolicy LightMapPolicyType;
 
@@ -119,15 +118,12 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessDeferredShadingPath(const FM
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
 bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMeshBatch& MeshBatch, uint64 BatchElementMask, const FMaterial& Material, const FMaterialRenderProxy& MaterialRenderProxy, const FPrimitiveSceneProxy* PrimitiveSceneProxy, int32 StaticMeshId)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	const int32 NumMovablePointLights = 0;
 
@@ -167,9 +163,7 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMes
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 	
 	//FUniformLightMapPolicy NoLightmapPolicy(LMP_NO_LIGHTMAP);

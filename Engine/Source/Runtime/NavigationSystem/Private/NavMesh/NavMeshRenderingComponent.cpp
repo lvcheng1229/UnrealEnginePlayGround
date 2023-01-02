@@ -1192,11 +1192,7 @@ void FNavMeshSceneProxy::GetDynamicMeshElements(const TArray<const FSceneView*>&
 					BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
 
 					Mesh.bWireframe = false;
-#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
-#else
-					ensure(false);
-#endif
 					Mesh.MaterialRenderProxy = MeshColors[Index].Get();
 					Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
 					Mesh.Type = PT_TriangleList;

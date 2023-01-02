@@ -376,7 +376,7 @@ bool FRayTracingMeshProcessor::Process(
 		FMeshMaterialShader,
 		FMeshMaterialShader,
 		FMaterialCHS> RayTracingShaders;
-#if !ENABLE_TANGRAM
+
 	if (GRHISupportsRayTracingShaders)
 	{
 		if (!GetRayTracingMeshProcessorShaders(LightMapPolicy, MeshBatch.VertexFactory, MaterialResource, RayTracingShaders.RayHitGroupShader))
@@ -397,22 +397,17 @@ bool FRayTracingMeshProcessor::Process(
 		PassDrawRenderState,
 		RayTracingShaders,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
 void FRayTracingMeshProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBatch, uint64 BatchElementMask, const FPrimitiveSceneProxy* RESTRICT PrimitiveSceneProxy)
 {
-#if !ENABLE_TANGRAM
 	if (!MeshBatch.bUseForMaterial || !IsSupportedVertexFactoryType(MeshBatch.VertexFactory->GetType()))
 	{
 		return;
 	}
-#else
-	ensure(false);
-#endif
+
 	const FMaterialRenderProxy* FallbackMaterialRenderProxyPtr = MeshBatch.MaterialRenderProxy;
 	while (FallbackMaterialRenderProxyPtr)
 	{

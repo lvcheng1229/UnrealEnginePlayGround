@@ -740,8 +740,6 @@ bool FDepthPassMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-#if !ENABLE_TANGRAM
-
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -792,9 +790,7 @@ bool FDepthPassMeshProcessor::Process(
 		SortKey,
 		bPositionOnly ? EMeshPassFeatures::PositionOnly : EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -814,11 +810,7 @@ bool FDepthPassMeshProcessor::TryAddMeshBatch(const FMeshBatch& RESTRICT MeshBat
 	{
 		if (BlendMode == BLEND_Opaque
 			&& EarlyZPassMode != DDM_MaskedOnly
-#if !ENABLE_TANGRAM
 			&& MeshBatch.VertexFactory->SupportsPositionOnlyStream()
-#else
-			&& ensure(false)
-#endif
 			&& !Material.MaterialModifiesMeshPosition_RenderThread()
 			&& Material.WritesEveryPixel())
 		{

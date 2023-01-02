@@ -203,7 +203,7 @@ void FRayTracingDynamicGeometryCollection::AddDynamicMeshBatchForGeometryUpdate(
 		bUseSharedVertexBuffer = true;
 		RWBuffer = &VertexPositionBuffer->RWBuffer;
 	}
-#if !ENABLE_TANGRAM
+
 	for (const FMeshBatch& MeshBatch : UpdateParams.MeshBatches)
 	{
 		if (!ensureMsgf(MeshBatch.VertexFactory->GetType()->SupportsRayTracingDynamicGeometry(),
@@ -293,9 +293,7 @@ void FRayTracingDynamicGeometryCollection::AddDynamicMeshBatchForGeometryUpdate(
 
 		DispatchCommands.Add(DispatchCmd);
 	}
-#else
-	ensure(false);
-#endif
+
 	bool bRefit = true;
 
 	// Optionally resize the buffer when not shared (could also be lazy allocated and still empty)

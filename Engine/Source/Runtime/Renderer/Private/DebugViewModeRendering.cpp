@@ -282,7 +282,7 @@ void FDebugViewModeMeshProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBa
 	}
 
 	const FMaterial* Material = BatchMaterial;
-#if !ENABLE_TANGRAM
+
 	FVertexFactoryType* VertexFactoryType = MeshBatch.VertexFactory->GetType();
 
 	FMaterialShaderTypes ShaderTypes;
@@ -342,9 +342,6 @@ void FDebugViewModeMeshProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBa
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
 }
 
 void FDebugViewModeMeshProcessor::UpdateInstructionCount(FDebugViewModeShaderElementData& OutShaderElementData, const FMaterial* InBatchMaterial, FVertexFactoryType* InVertexFactoryType)

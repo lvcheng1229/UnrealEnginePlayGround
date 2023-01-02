@@ -991,11 +991,7 @@ void FKAggregateGeom::GetAggGeom(const FTransform& Transform, const FColor Color
 				FMeshBatch& Mesh = Collector.AllocateMesh();
 				FMeshBatchElement& BatchElement = Mesh.Elements[0];
 				BatchElement.IndexBuffer = RenderInfo->IndexBuffer;
-#if !ENABLE_TANGRAM	
 				Mesh.VertexFactory = RenderInfo->CollisionVertexFactory;
-#else
-				ensure(false);
-#endif
 				Mesh.MaterialRenderProxy = MatInst;
 				FBoxSphereBounds WorldBounds, LocalBounds;
 				CalcBoxSphereBounds(WorldBounds, LocalToWorld);

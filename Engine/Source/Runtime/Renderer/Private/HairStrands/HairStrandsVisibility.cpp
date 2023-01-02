@@ -595,7 +595,6 @@ bool FHairMaterialProcessor::TryAddMeshBatch(
 	const FMaterialRenderProxy& MaterialRenderProxy,
 	const FMaterial& Material)
 {
-#if !ENABLE_TANGRAM
 	static const FVertexFactoryType* CompatibleVF = FVertexFactoryType::GetVFByName(TEXT("FHairStrandsVertexFactory"));
 
 	// Determine the mesh's material and blend mode.
@@ -625,9 +624,7 @@ bool FHairMaterialProcessor::TryAddMeshBatch(
 
 		return Process(MeshBatchCopy, BatchElementMask, PrimitiveSceneProxy, StaticMeshId, MaterialRenderProxy, Material, MacroGroupId, HairMaterialId, IdInfo.DrawPrimitiveId, LightChannelMask);
 	}
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -643,7 +640,6 @@ bool FHairMaterialProcessor::Process(
 	const int32 HairPrimitiveId,
 	const uint32 HairPrimitiveLightChannelMask)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -683,9 +679,7 @@ bool FHairMaterialProcessor::Process(
 		FMeshDrawCommandSortKey::Default,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -1337,7 +1331,6 @@ bool FHairVisibilityProcessor::TryAddMeshBatch(
 	const FMaterialRenderProxy& MaterialRenderProxy,
 	const FMaterial& Material)
 {
-#if !ENABLE_TANGRAM
 	static const FVertexFactoryType* CompatibleVF = FVertexFactoryType::GetVFByName(TEXT("FHairStrandsVertexFactory"));
 
 	// Determine the mesh's material and blend mode.
@@ -1365,9 +1358,7 @@ bool FHairVisibilityProcessor::TryAddMeshBatch(
 		else if (RenderMode == HairVisibilityRenderMode_PPLL)
 			return Process<HairVisibilityRenderMode_PPLL>(MeshBatch, BatchElementMask, PrimitiveSceneProxy, StaticMeshId, MaterialRenderProxy, Material, HairMacroGroupId, HairMaterialId, LightChannelMask, MeshFillMode, MeshCullMode);
 	}
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 

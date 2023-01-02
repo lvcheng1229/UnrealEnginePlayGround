@@ -423,7 +423,7 @@ bool FNaniteMeshProcessor::TryAddMeshBatch(
 
 	TShaderMapRef<FNaniteIndirectMaterialVS> NaniteVertexShader(GetGlobalShaderMap(FeatureLevel));
 	TShaderRef<TBasePassPixelShaderPolicyParamType<FUniformLightMapPolicy>> BasePassPixelShader;
-#if !ENABLE_TANGRAM
+
 	bool bShadersValid = GetBasePassShaders<FUniformLightMapPolicy>(
 		Material,
 		MeshBatch.VertexFactory->GetType(),
@@ -439,9 +439,7 @@ bool FNaniteMeshProcessor::TryAddMeshBatch(
 	{
 		return false;
 	}
-#else
-	ensure(false);
-#endif
+
 	TMeshProcessorShaders
 		<
 		FNaniteIndirectMaterialVS,

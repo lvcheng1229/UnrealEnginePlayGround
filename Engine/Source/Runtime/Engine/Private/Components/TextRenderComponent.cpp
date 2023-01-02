@@ -737,11 +737,7 @@ void FTextRenderSceneProxy::GetDynamicMeshElements(const TArray<const FSceneView
 					FMeshBatch& Mesh = Collector.AllocateMesh();
 					FMeshBatchElement& BatchElement = Mesh.Elements[0];
 					BatchElement.IndexBuffer = &IndexBuffer;
-#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
-#else
-					ensure(false);
-#endif					
 					BatchElement.FirstIndex = TextBatch.IndexBufferOffset;
 					BatchElement.NumPrimitives = TextBatch.IndexBufferCount / 3;
 					BatchElement.MinVertexIndex = TextBatch.VertexBufferOffset;
@@ -779,11 +775,7 @@ void FTextRenderSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* PD
 			FMeshBatch Mesh;
 			FMeshBatchElement& BatchElement = Mesh.Elements[0];
 			BatchElement.IndexBuffer = &IndexBuffer;
-#if !ENABLE_TANGRAM
 			Mesh.VertexFactory = &VertexFactory;
-#else
-			ensure(false);
-#endif			
 			Mesh.MaterialRenderProxy = TextBatch.Material->GetRenderProxy();
 			BatchElement.FirstIndex = TextBatch.IndexBufferOffset;
 			BatchElement.NumPrimitives = TextBatch.IndexBufferCount / 3;

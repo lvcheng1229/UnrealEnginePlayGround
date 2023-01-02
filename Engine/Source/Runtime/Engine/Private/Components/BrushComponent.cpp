@@ -277,11 +277,7 @@ public:
 							FMeshBatch& Mesh = Collector.AllocateMesh();
 							FMeshBatchElement& BatchElement = Mesh.Elements[0];
 							BatchElement.IndexBuffer = &WireIndexBuffer;
-#if !ENABLE_TANGRAM
 							Mesh.VertexFactory = &VertexFactory;
-#else
-							ensure(false);
-#endif	
 							Mesh.MaterialRenderProxy = WireframeMaterial;
 							BatchElement.FirstIndex = 0;
 							BatchElement.NumPrimitives = WireIndexBuffer.GetNumEdges();

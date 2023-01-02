@@ -833,7 +833,6 @@ bool FHitProxyMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -868,9 +867,7 @@ bool FHitProxyMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -956,8 +953,6 @@ bool FEditorSelectionMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-		
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -996,9 +991,7 @@ bool FEditorSelectionMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -1112,8 +1105,6 @@ bool FEditorLevelInstanceMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-	
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -1153,9 +1144,7 @@ bool FEditorLevelInstanceMeshProcessor::Process(
 		SortKey,
 		EMeshPassFeatures::Default,
 		ShaderElementData);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 

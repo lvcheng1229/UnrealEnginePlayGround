@@ -449,11 +449,7 @@ public:
 												FMeshBatch& MeshElement = Collector.AllocateMesh();
 												FMeshBatchElement& BatchElement = MeshElement.Elements[0];
 												BatchElement.IndexBuffer = IndexAllocation.IndexBuffer;
-#if !ENABLE_TANGRAM
 												MeshElement.VertexFactory = &VertexFactory;
-#else
-												ensure(false);
-#endif
 												MeshElement.MaterialRenderProxy = (MatProxyOverride != nullptr) ? MatProxyOverride : ProxyElementInfo.GetMaterial()->GetRenderProxy();
 												MeshElement.LCI = &ProxyElementInfo;
 												BatchElement.FirstIndex = FirstIndex;
@@ -489,11 +485,7 @@ public:
 								FMeshBatch& MeshElement = Collector.AllocateMesh();
 								FMeshBatchElement& BatchElement = MeshElement.Elements[0];
 								BatchElement.IndexBuffer = ModelElement.IndexBuffer;
-#if !ENABLE_TANGRAM
 								MeshElement.VertexFactory = &VertexFactory;
-#else
-								ensure(false);
-#endif
 								MeshElement.MaterialRenderProxy = (MatProxyOverride != nullptr) ? MatProxyOverride : Elements[ElementIndex].GetMaterial()->GetRenderProxy();
 								MeshElement.LCI = &Elements[ElementIndex];
 								BatchElement.FirstIndex = ModelElement.FirstIndex;
@@ -536,11 +528,7 @@ public:
 					FMeshBatch MeshElement;
 					FMeshBatchElement& BatchElement = MeshElement.Elements[0];
 					BatchElement.IndexBuffer = ModelElement.IndexBuffer;
-#if !ENABLE_TANGRAM
 					MeshElement.VertexFactory = &VertexFactory;
-#else
-					ensure(false);
-#endif
 					MeshElement.MaterialRenderProxy = Elements[ElementIndex].GetMaterial()->GetRenderProxy();
 					MeshElement.LCI = &Elements[ElementIndex];
 					BatchElement.FirstIndex = ModelElement.FirstIndex;

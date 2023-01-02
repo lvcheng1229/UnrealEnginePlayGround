@@ -142,7 +142,7 @@ void FRendererModule::DrawTileMesh(FCanvasRenderContext& RenderContext, FMeshPas
 		FMaterialRenderProxy::UpdateDeferredCachedUniformExpressions();
 
 		FSinglePrimitiveStructured& SinglePrimitiveStructured = GTilePrimitiveBuffer;
-#if !ENABLE_TANGRAM
+
 		if (Mesh.VertexFactory->GetPrimitiveIdStreamIndex(FeatureLevel, EVertexInputStreamType::PositionOnly) >= 0)
 		{
 			FMeshBatchElement& MeshElement = Mesh.Elements[0];
@@ -199,9 +199,7 @@ void FRendererModule::DrawTileMesh(FCanvasRenderContext& RenderContext, FMeshPas
 				View.LightmapSceneDataOverrideSRV = SinglePrimitiveStructured.LightmapSceneDataBufferSRV;
 			}
 		}
-#else
-		ensure(false);
-#endif
+
 		FRDGBuilder& GraphBuilder = RenderContext.GraphBuilder;
 
 		if (!FRDGSystemTextures::IsValid(GraphBuilder))

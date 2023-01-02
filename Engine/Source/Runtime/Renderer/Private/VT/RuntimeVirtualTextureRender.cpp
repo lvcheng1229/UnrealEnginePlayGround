@@ -457,7 +457,6 @@ namespace RuntimeVirtualTexture
 			const FMaterialRenderProxy& RESTRICT MaterialRenderProxy,
 			const FMaterial& RESTRICT MaterialResource)
 		{
-#if !ENABLE_TANGRAM
 			const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 			TMeshProcessorShaders<
@@ -504,9 +503,7 @@ namespace RuntimeVirtualTexture
 				SortKey,
 				EMeshPassFeatures::Default,
 				ShaderElementData);
-#else
-			ensure(false);
-#endif
+
 			return true;
 		}
 

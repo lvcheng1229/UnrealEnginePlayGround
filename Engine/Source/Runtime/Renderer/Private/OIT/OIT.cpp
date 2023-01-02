@@ -393,7 +393,7 @@ static void AddOITSortTriangleIndexPass(
 	// Fat format: PF_R32G32_UINT | Compact format: PF_R32_UINT
 	const EPixelFormat PackedFormat = PF_R32_UINT;
 	const uint32 PackedFormatInBytes = 4;
-#if !ENABLE_TANGRAM
+
 	const bool bIsValid = 
 		MeshBatch.Mesh != nullptr && 
 		MeshBatch.Mesh->VertexFactory != nullptr &&
@@ -543,9 +543,7 @@ static void AddOITSortTriangleIndexPass(
 				RHICmdList.Transition(FRHITransitionInfo(SortedIndexBufferRHI, ERHIAccess::UAVCompute, ERHIAccess::VertexOrIndexBuffer));
 			});
 	}
-#else
-	ensure(false);
-#endif
+
 	// Next todos
 	// * Merge several meshes together (not clear out to do the mapping thread->mesh info)
 	// * Batch Scan/Alloc/Write of several primitive, so that we have better overlapping
@@ -611,14 +609,11 @@ namespace OIT
 	{
 		// Only support local vertex factory at the moment as we need to have direct access to the position
 		static const FVertexFactoryType* CompatibleVF = FVertexFactoryType::GetVFByName(TEXT("FLocalVertexFactory"));
-#if !ENABLE_TANGRAM
+
 		if (InMesh.IsTranslucent(InFeatureLevel))
 		{
 			return InMesh.VertexFactory->GetType()->GetHashedName() == CompatibleVF->GetHashedName();
 		}
-#else
-		ensure(false);
-#endif
 		return false;
 	}
 

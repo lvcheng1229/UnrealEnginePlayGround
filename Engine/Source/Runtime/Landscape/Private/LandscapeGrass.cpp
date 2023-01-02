@@ -430,13 +430,8 @@ bool FLandscapeGrassWeightMeshProcessor::TryAddMeshBatch(
 	int32 FirstHeightMipsPassIndex,
 	const TArray<int32>& HeightMips)
 {
-#if !ENABLE_TANGRAM
 	check(MeshBatch.VertexFactory != nullptr);
 	return Process(MeshBatch, BatchElementMask, PrimitiveSceneProxy, MaterialRenderProxy, MaterialResource, NumPasses, ViewOffset, PassOffsetX, FirstHeightMipsPassIndex, HeightMips);
-#else
-	ensure(false);
-	return true;
-#endif
 }
 
 bool FLandscapeGrassWeightMeshProcessor::Process(
@@ -451,7 +446,6 @@ bool FLandscapeGrassWeightMeshProcessor::Process(
 	int32 FirstHeightMipsPassIndex,
 	const TArray<int32>& HeightMips)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -501,9 +495,7 @@ bool FLandscapeGrassWeightMeshProcessor::Process(
 			EMeshPassFeatures::Default,
 			ShaderElementData);
 	}
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 

@@ -1065,11 +1065,7 @@ public:
 		FMeshBatchElement& BatchElement = Mesh.Elements[0];
 		BatchElement.IndexBuffer = &IndexBuffer;
 		Mesh.bWireframe = bWireframe;
-#if !ENABLE_TANGRAM
 		Mesh.VertexFactory = &RenderBuffers.VertexFactory;
-#else
-		ensure(false);
-#endif
 		Mesh.MaterialRenderProxy = UseMaterial;
 
 		BatchElement.PrimitiveUniformBufferResource = &DynamicPrimitiveUniformBuffer.UniformBuffer;
@@ -1181,11 +1177,8 @@ public:
 
 		uint32 SectionIdx = 0;
 		FMeshBatch MeshBatch;
-#if !ENABLE_TANGRAM
+
 		MeshBatch.VertexFactory = &RenderBuffers.VertexFactory;
-#else
-		ensure(false);
-#endif
 		MeshBatch.SegmentIndex = 0;
 		MeshBatch.MaterialRenderProxy = UseMaterialProxy;
 		MeshBatch.ReverseCulling = IsLocalToWorldDeterminantNegative();

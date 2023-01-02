@@ -866,11 +866,7 @@ void FGeometryCollectionSceneProxy::GetDynamicMeshElements(const TArray<const FS
 					FMeshBatchElement& BatchElement = Mesh.Elements[0];
 					BatchElement.IndexBuffer = &OriginalMeshIndexBuffer;
 					Mesh.bWireframe = bWireframe;
-#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
-#else
-					ensure(false);
-#endif
 					Mesh.MaterialRenderProxy = MaterialProxies[SectionIndex];
 
 					/*
@@ -932,11 +928,7 @@ void FGeometryCollectionSceneProxy::GetDynamicMeshElements(const TArray<const FS
 					FMeshBatchElement& BatchElement = Mesh.Elements[0];
 					BatchElement.IndexBuffer = &IndexBuffer;
 					Mesh.bWireframe = bWireframe;
-#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &VertexFactory;
-#else
-					ensure(false);
-#endif
 					Mesh.MaterialRenderProxy = MaterialProxies[SectionIndex];
 					BatchElement.PrimitiveUniformBuffer = GetUniformBuffer();
 					BatchElement.FirstIndex = Section.FirstIndex;
@@ -969,11 +961,7 @@ void FGeometryCollectionSceneProxy::GetDynamicMeshElements(const TArray<const FS
 				FMeshBatchElement& BatchElement = Mesh.Elements[0];
 				BatchElement.IndexBuffer = &IndexBuffer;
 				Mesh.bWireframe = bWireframe;
-#if !ENABLE_TANGRAM
 				Mesh.VertexFactory = &VertexFactory;
-#else
-				ensure(false);
-#endif
 				Mesh.MaterialRenderProxy = MaterialRenderProxy;
 				BatchElement.PrimitiveUniformBuffer = GetUniformBuffer();
 				BatchElement.FirstIndex = 0;
@@ -1077,11 +1065,7 @@ void FGeometryCollectionSceneProxy::GetDynamicRayTracingInstances(FRayTracingMat
 				FMeshBatch& Mesh = RayTracingInstance.Materials.AddDefaulted_GetRef();
 				Mesh.bWireframe = bWireframe;//bWireframe needs viewfamily access ?
 				Mesh.SegmentIndex = SectionIndex;
-#if !ENABLE_TANGRAM
 				Mesh.VertexFactory = &GeometryCollectionVertexFactory;
-#else
-				ensure(false);
-#endif
 				Mesh.MaterialRenderProxy = MaterialProxies[SectionIndex];
 				Mesh.LODIndex = LODIndex;
 				Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();

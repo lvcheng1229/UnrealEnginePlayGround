@@ -58,7 +58,6 @@ protected:
 		PassShadersType PassShaders,
 		const ShaderElementDataType& ShaderElementData)
 	{
-#if !ENABLE_TANGRAM
 		const FVertexFactory* RESTRICT VertexFactory = MeshBatch.VertexFactory;
 
 		checkf(MaterialRenderProxy.ImmutableSamplerState.ImmutableSamplers[0] == nullptr, TEXT("Immutable samplers not yet supported in Mesh Draw Command pipeline"));
@@ -109,9 +108,6 @@ protected:
 				CommandContext->FinalizeCommand(RayTracingMeshCommand);
 			}
 		}
-#else
-		ensure(false);
-#endif
 	}
 
 private:

@@ -47,11 +47,8 @@ void FCanvasTileRendererItem::FTileVertexFactory::InitResource()
 FMeshBatch* FCanvasTileRendererItem::FRenderData::AllocTileMeshBatch(FCanvasRenderContext& InRenderContext, FHitProxyId InHitProxyId)
 {
 	FMeshBatch* MeshBatch = InRenderContext.Alloc<FMeshBatch>();
-#if !ENABLE_TANGRAM
+
 	MeshBatch->VertexFactory = &VertexFactory;
-#else
-	ensure(false);
-#endif
 	MeshBatch->MaterialRenderProxy = MaterialRenderProxy;
 	MeshBatch->ReverseCulling = false;
 	MeshBatch->Type = PT_TriangleList;

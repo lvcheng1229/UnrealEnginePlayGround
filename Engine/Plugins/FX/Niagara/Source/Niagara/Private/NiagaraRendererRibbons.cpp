@@ -1193,11 +1193,8 @@ void FNiagaraRendererRibbons::SetupMeshBatchAndCollectorResourceForView(
 	CollectorResources.VertexFactory.SetRibbonUniformBuffer(CollectorResources.UniformBuffer);
 	CollectorResources.VertexFactory.SetFacingMode(static_cast<uint32>(FacingMode));
 
-#if !ENABLE_TANGRAM
+
 	MeshBatch.VertexFactory = &CollectorResources.VertexFactory;
-#else
-	ensure(false);
-#endif
 	MeshBatch.CastShadow = SceneProxy->CastsDynamicShadow();
 #if RHI_RAYTRACING
 	MeshBatch.CastRayTracedShadow = SceneProxy->CastsDynamicShadow();

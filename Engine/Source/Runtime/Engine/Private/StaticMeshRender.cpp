@@ -495,15 +495,11 @@ void FStaticMeshSceneProxy::AddSpeedTreeWind()
 {
 	if (StaticMesh && RenderData && StaticMesh->SpeedTreeWind.IsValid())
 	{
-#if !ENABLE_TANGRAM
 		for (int32 LODIndex = 0; LODIndex < RenderData->LODVertexFactories.Num(); ++LODIndex)
 		{
 			GetScene().AddSpeedTreeWind(&RenderData->LODVertexFactories[LODIndex].VertexFactory, StaticMesh);
 			GetScene().AddSpeedTreeWind(&RenderData->LODVertexFactories[LODIndex].VertexFactoryOverrideColorVertexBuffer, StaticMesh);
 		}
-#else
-	ensure(false);
-#endif
 	}
 }
 
@@ -512,15 +508,11 @@ void FStaticMeshSceneProxy::RemoveSpeedTreeWind()
 	check(IsInRenderingThread());
 	if (StaticMesh && RenderData && StaticMesh->SpeedTreeWind.IsValid())
 	{
-#if !ENABLE_TANGRAM
 		for (int32 LODIndex = 0; LODIndex < RenderData->LODVertexFactories.Num(); ++LODIndex)
 		{
 			GetScene().RemoveSpeedTreeWind_RenderThread(&RenderData->LODVertexFactories[LODIndex].VertexFactoryOverrideColorVertexBuffer, StaticMesh);
 			GetScene().RemoveSpeedTreeWind_RenderThread(&RenderData->LODVertexFactories[LODIndex].VertexFactory, StaticMesh);
 		}
-#else
-		ensure(false);
-#endif
 	}
 }
 
@@ -583,21 +575,13 @@ bool FStaticMeshSceneProxy::GetShadowMeshElement(int32 LODIndex, int32 BatchInde
 
 	if (ProxyLODInfo.OverrideColorVertexBuffer)
 	{
-#if !ENABLE_TANGRAM
 		OutMeshBatch.VertexFactory = &VFs.VertexFactoryOverrideColorVertexBuffer;
-#else
-		ensure(false);
-#endif	
 		OutMeshBatchElement.VertexFactoryUserData = ProxyLODInfo.OverrideColorVFUniformBuffer.GetReference();
 	}
 	else
 	{
-#if !ENABLE_TANGRAM
 		OutMeshBatch.VertexFactory = &VFs.VertexFactory;
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
-#else
-		ensure(false);
-#endif	
 	}
 
 	OutMeshBatchElement.IndexBuffer = LOD.AdditionalIndexBuffers && bUseReversedIndices ? &LOD.AdditionalIndexBuffers->ReversedDepthOnlyIndexBuffer : &LOD.DepthOnlyIndexBuffer;
@@ -679,23 +663,17 @@ bool FStaticMeshSceneProxy::GetMeshElement(
 		check(Section.MaxVertexIndex < ProxyLODInfo.OverrideColorVertexBuffer->GetNumVertices())
 
 		// Use the instanced colors vertex factory.
-#if !ENABLE_TANGRAM
 		VertexFactory = &VFs.VertexFactoryOverrideColorVertexBuffer;
-#else
-		ensure(false);
-#endif	
+
 		OutMeshBatchElement.VertexFactoryUserData = ProxyLODInfo.OverrideColorVFUniformBuffer.GetReference();
 		OutMeshBatchElement.UserData = ProxyLODInfo.OverrideColorVertexBuffer;
 		OutMeshBatchElement.bUserDataIsColorVertexBuffer = true;
 	}
 	else
 	{
-#if !ENABLE_TANGRAM
-		OutMeshBatch.VertexFactory = &VFs.VertexFactory;
+		VertexFactory = &VFs.VertexFactory;
+
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
-#else
-		ensure(false);
-#endif	
 	}
 
 	const bool bWireframe = false;
@@ -794,21 +772,15 @@ bool FStaticMeshSceneProxy::GetWireframeMeshElement(int32 LODIndex, int32 BatchI
 
 	if (ProxyLODInfo.OverrideColorVertexBuffer)
 	{
-#if !ENABLE_TANGRAM
 		VertexFactory = &VFs.VertexFactoryOverrideColorVertexBuffer;
-#else
-		ensure(false);
-#endif	
+
 		OutBatchElement.VertexFactoryUserData = ProxyLODInfo.OverrideColorVFUniformBuffer.GetReference();
 	}
 	else
 	{
-#if !ENABLE_TANGRAM
 		VertexFactory = &VFs.VertexFactory;
+
 		OutBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
-#else
-		ensure(false);
-#endif	
 	}
 
 	const bool bWireframe = true;
@@ -861,21 +833,15 @@ bool FStaticMeshSceneProxy::GetCollisionMeshElement(
 
 	if (ProxyLODInfo.OverrideColorVertexBuffer)
 	{
-#if !ENABLE_TANGRAM
 		VertexFactory = &VFs.VertexFactoryOverrideColorVertexBuffer;
-#else
-		ensure(false);
-#endif	
+
 		OutMeshBatchElement.VertexFactoryUserData = ProxyLODInfo.OverrideColorVFUniformBuffer.GetReference();
 	}
 	else
 	{
-#if !ENABLE_TANGRAM
 		VertexFactory = &VFs.VertexFactory;
+
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
-#else
-		ensure(false);
-#endif	
 	}
 
 	if (OutMeshBatchElement.NumPrimitives > 0)
@@ -889,11 +855,7 @@ bool FStaticMeshSceneProxy::GetCollisionMeshElement(
 		OutMeshBatch.CastShadow = false;
 		OutMeshBatch.DepthPriorityGroup = (ESceneDepthPriorityGroup)InDepthPriorityGroup;
 		OutMeshBatch.LCI = &ProxyLODInfo;
-#if !ENABLE_TANGRAM
 		OutMeshBatch.VertexFactory = VertexFactory;
-#else
-		ensure(false);
-#endif	
 		OutMeshBatch.MaterialRenderProxy = RenderProxy;
 
 		OutMeshBatchElement.MinVertexIndex = Section.MinVertexIndex;
@@ -1077,11 +1039,8 @@ uint32 FStaticMeshSceneProxy::SetMeshElementGeometrySource(
 	}
 
 	OutMeshBatchElement.NumPrimitives = NumPrimitives;
-#if !ENABLE_TANGRAM
 	OutMeshBatch.VertexFactory = VertexFactory;
-#else
-	ensure(false);
-#endif	
+
 	return NumPrimitives;
 }
 
@@ -1836,11 +1795,7 @@ void FStaticMeshSceneProxy::GetDynamicRayTracingInstances(FRayTracingMaterialGat
 				{
 					// Hidden material
 					Mesh.MaterialRenderProxy = UMaterial::GetDefaultMaterial(MD_Surface)->GetRenderProxy();
-#if !ENABLE_TANGRAM
 					Mesh.VertexFactory = &RenderData->LODVertexFactories[LODIndex].VertexFactory;
-#else
-					ensure(false);
-#endif	
 				}
 
 				Mesh.SegmentIndex = SectionIndex;
@@ -1850,7 +1805,6 @@ void FStaticMeshSceneProxy::GetDynamicRayTracingInstances(FRayTracingMaterialGat
 
 		RayTracingInstance.Geometry = &Geometry;
 		RayTracingInstance.InstanceTransforms.Add(GetLocalToWorld());
-#if !ENABLE_TANGRAM
 		if (bEvaluateWPO && RenderData->LODVertexFactories[LODIndex].VertexFactory.GetType()->SupportsRayTracingDynamicGeometry())
 		{
 			// Use the internal vertex buffer only when initialized otherwise used the shared vertex buffer - needs to be updated every frame
@@ -1874,9 +1828,7 @@ void FStaticMeshSceneProxy::GetDynamicRayTracingInstances(FRayTracingMaterialGat
 				}
 			);
 		}
-#else
-		ensure(false);
-#endif
+		
 		RayTracingInstance.BuildInstanceMaskAndFlags(GetScene().GetFeatureLevel());
 
 		checkf(RayTracingInstance.Geometry->Initializer.Segments.Num() == RayTracingInstance.Materials.Num(), TEXT("Segments/Materials mismatch. Number of segments: %d. Number of Materials: %d. LOD Index: %d"), 
@@ -2132,13 +2084,10 @@ FStaticMeshSceneProxy::FLODInfo::FLODInfo(const UStaticMeshComponent* InComponen
 				// the instance should point to the loaded data to avoid copy and memory waste
 				OverrideColorVertexBuffer = ComponentLODInfo.OverrideVertexColors;
 				check(OverrideColorVertexBuffer->GetStride() == sizeof(FColor)); //assumed when we set up the stream
-#if !ENABLE_TANGRAM
+
 				if (RHISupportsManualVertexFetch(GMaxRHIShaderPlatform))
 				{
 					TUniformBufferRef<FLocalVertexFactoryUniformShaderParameters>* UniformBufferPtr = &OverrideColorVFUniformBuffer;
-
-					
-
 					const FLocalVertexFactory* LocalVF = &VFs.VertexFactoryOverrideColorVertexBuffer;
 					FColorVertexBuffer* VertexBuffer = OverrideColorVertexBuffer;
 
@@ -2154,9 +2103,6 @@ FStaticMeshSceneProxy::FLODInfo::FLODInfo(const UStaticMeshComponent* InComponen
 						*UniformBufferPtr = CreateLocalVFUniformBuffer(LocalVF, LODIndex, VertexBuffer, 0, 0);
 					});
 				}
-#else
-				ensure(false);
-#endif	
 			}
 		}
 	}

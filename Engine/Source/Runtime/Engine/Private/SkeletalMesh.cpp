@@ -6270,12 +6270,8 @@ void FSkeletalMeshSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* 
 					FMeshBatch MeshElement;
 					FMeshBatchElement& BatchElement = MeshElement.Elements[0];
 					MeshElement.DepthPriorityGroup = PrimitiveDPG;
-#if !ENABLE_TANGRAM	
 					MeshElement.VertexFactory = MeshObject->GetSkinVertexFactory(nullptr, LODIndex, SectionIndex);
 					MeshElement.MaterialRenderProxy = SectionElementInfo.Material->GetRenderProxy();
-#else
-					ensure(false);
-#endif
 					MeshElement.ReverseCulling = IsLocalToWorldDeterminantNegative();
 					MeshElement.CastShadow = SectionElementInfo.bEnableShadowCasting;
 				#if RHI_RAYTRACING
@@ -6419,11 +6415,7 @@ void FSkeletalMeshSceneProxy::GetMeshElementsConditionallySelectable(const TArra
 
 void FSkeletalMeshSceneProxy::CreateBaseMeshBatch(const FSceneView* View, const FSkeletalMeshLODRenderData& LODData, const int32 LODIndex, const int32 SectionIndex, const FSectionElementInfo& SectionElementInfo, FMeshBatch& Mesh, ESkinVertexFactoryMode VFMode) const
 {
-#if !ENABLE_TANGRAM	
 	Mesh.VertexFactory = MeshObject->GetSkinVertexFactory(View, LODIndex, SectionIndex, VFMode);
-#else
-	ensure(false);
-#endif
 	Mesh.MaterialRenderProxy = SectionElementInfo.Material->GetRenderProxy();
 #if RHI_RAYTRACING
 	Mesh.SegmentIndex = SectionIndex;
@@ -6484,16 +6476,13 @@ void FSkeletalMeshSceneProxy::GetDynamicElementsSection(const TArray<const FScen
 			FMeshBatch& Mesh = Collector.AllocateMesh();
 
 			CreateBaseMeshBatch(View, LODData, LODIndex, SectionIndex, SectionElementInfo, Mesh);
-
-#if !ENABLE_TANGRAM	
+			
 			if(!Mesh.VertexFactory)
 			{
 				// hide this part
 				continue;
 			}
-#else
-			ensure(false);
-#endif
+
 			Mesh.bWireframe |= bForceWireframe;
 			Mesh.Type = PT_TriangleList;
 			Mesh.bSelectable = bInSelectable;

@@ -15,6 +15,10 @@
 #include "RenderingThread.h"
 #include "VertexFactory.h"
 #include "LocalVertexFactory.h"
+
+//TanGram
+#include "TanGramVertexFactory.h"
+
 #include "RawIndexBuffer.h"
 #include "Engine/TextureStreamingTypes.h"
 #include "Components/StaticMeshComponent.h"
@@ -886,7 +890,6 @@ int32 FStaticMeshLODResources::GetNumTexCoords() const
 	return VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords();
 }
 
-#if !ENABLE_TANGRAM
 void FStaticMeshVertexFactories::InitVertexFactory(
 	const FStaticMeshLODResources& LodResources,
 	FLocalVertexFactory& InOutVertexFactory,
@@ -957,16 +960,9 @@ void FStaticMeshVertexFactories::InitVertexFactory(
 			Params.VertexFactory->InitResource();
 		});
 }
-#else
-void FStaticMeshVertexFactories::InitVertexFactory(const FStaticMeshLODResources& LodResources, FTanGramLocalVertexAttribute& InOutVertexFactory, uint32 LODIndex, const UStaticMesh* InParentMesh, bool bInOverrideColorVertexBuffer)
-{
-	ensure(false);
-}
-#endif
 
 void FStaticMeshVertexFactories::InitResources(const FStaticMeshLODResources& LodResources, uint32 LODIndex, const UStaticMesh* Parent)
 {
-#if !ENABLE_TANGRAM	
 	InitVertexFactory(LodResources, VertexFactory, LODIndex, Parent, false);
 	BeginInitResource(&VertexFactory);
 
@@ -1001,17 +997,16 @@ void FStaticMeshVertexFactories::InitResources(const FStaticMeshLODResources& Lo
 			Params.VertexFactory->InitResource();
 	
 		});
-#else
-	ensure(false);
-#endif
 }
 
 void FStaticMeshVertexFactories::ReleaseResources()
 {
-#if !ENABLE_TANGRAM	
 	// Release the vertex factories.
 	BeginReleaseResource(&VertexFactory);
 	BeginReleaseResource(&VertexFactoryOverrideColorVertexBuffer);
+
+	//TanGram
+	BeginReleaseResource(&TanGramVertexFactory);
 	
 	if (SplineVertexFactory)
 	{
@@ -1021,9 +1016,6 @@ void FStaticMeshVertexFactories::ReleaseResources()
 	{
 		BeginReleaseResource(SplineVertexFactoryOverrideColorVertexBuffer);		
 	}
-#else
-	ensure(false);
-#endif
 }
 
 FStaticMeshVertexFactories::~FStaticMeshVertexFactories()

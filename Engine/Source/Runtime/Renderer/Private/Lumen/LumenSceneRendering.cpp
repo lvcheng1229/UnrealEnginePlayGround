@@ -573,7 +573,7 @@ void FLumenCardMeshProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBatch,
 					const FMeshDrawingPolicyOverrideSettings OverrideSettings = ComputeMeshOverrideSettings(MeshBatch);
 					const ERasterizerFillMode MeshFillMode = ComputeMeshFillMode(MeshBatch, Material, OverrideSettings);
 					const ERasterizerCullMode MeshCullMode = ComputeMeshCullMode(MeshBatch, Material, OverrideSettings);
-#if !ENABLE_TANGRAM
+
 					if (!bIsTranslucent
 						&& ShouldIncludeDomainInMeshPass(Material.GetMaterialDomain()))
 					{
@@ -613,9 +613,7 @@ void FLumenCardMeshProcessor::AddMeshBatch(const FMeshBatch& RESTRICT MeshBatch,
 							EMeshPassFeatures::Default,
 							ShaderElementData);
 					}
-#else
-					ensure(false);
-#endif
+
 					return true;
 				};
 
@@ -729,7 +727,7 @@ bool FLumenCardNaniteMeshProcessor::TryAddMeshBatch(
 
 	FLumenCardNanitePassShaders PassShaders;
 	PassShaders.VertexShader = VertexShader;
-#if !ENABLE_TANGRAM
+
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 	FVertexFactoryType* VertexFactoryType = VertexFactory->GetType();
 	constexpr bool bMultiViewCapture = true;
@@ -762,9 +760,7 @@ bool FLumenCardNaniteMeshProcessor::TryAddMeshBatch(
 		EMeshPassFeatures::Default,
 		ShaderElementData
 	);
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 

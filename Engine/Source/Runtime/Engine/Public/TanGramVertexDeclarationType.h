@@ -1,3 +1,0 @@
-//TanGram
-
-#pragma once

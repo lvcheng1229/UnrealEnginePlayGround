@@ -385,12 +385,7 @@ void FGeometryCacheSceneProxy::CreateMeshBatch(
 	// Draw the mesh.
 	FMeshBatchElement& BatchElement = Mesh.Elements[0];
 	BatchElement.IndexBuffer = &TrackProxy->IndexBuffer;
-#if !ENABLE_TANGRAM
 	Mesh.VertexFactory = &TrackProxy->VertexFactory;
-#else
-	ensure(false);
-#endif
-	
 	Mesh.SegmentIndex = 0;
 
 	const FMatrix& LocalToWorldTransform = TrackProxy->WorldMatrix * GetLocalToWorld();

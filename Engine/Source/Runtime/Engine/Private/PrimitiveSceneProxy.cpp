@@ -53,17 +53,12 @@ bool CacheShadowDepthsFromPrimitivesUsingWPO()
 
 bool SupportsCachingMeshDrawCommands(const FMeshBatch& MeshBatch)
 {
-#if !ENABLE_TANGRAM
 	return
 		// Cached mesh commands only allow for a single mesh element per batch.
 		(MeshBatch.Elements.Num() == 1) &&
 
 		// Vertex factory needs to support caching.
 		MeshBatch.VertexFactory->GetType()->SupportsCachingMeshDrawCommands();
-#else
-	ensure(false);
-	return false;
-#endif
 }
 
 bool SupportsCachingMeshDrawCommands(const FMeshBatch& MeshBatch, ERHIFeatureLevel::Type FeatureLevel)

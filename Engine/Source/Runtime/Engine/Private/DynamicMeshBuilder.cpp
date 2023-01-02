@@ -888,11 +888,7 @@ void FDynamicMeshBuilder::GetMesh(
 		FMeshBatch& Mesh = Collector.AllocateMesh();
 		FMeshBatchElement& BatchElement = Mesh.Elements[0];
 		BatchElement.IndexBuffer = bHasValidIndexBuffer ? OneFrameResources->IndexBuffer : nullptr;
-#if !ENABLE_TANGRAM
 		Mesh.VertexFactory = OneFrameResources->VertexFactory;
-#else
-		ensure(false);
-#endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = OneFrameResources->PrimitiveUniformBuffer;
 
@@ -974,11 +970,7 @@ void FDynamicMeshBuilder::GetMeshElement(const FMatrix& LocalToWorld, const FMat
 		// Draw the mesh.
 		FMeshBatchElement& BatchElement = Mesh.Elements[0];
 		BatchElement.IndexBuffer = bHasValidIndexBuffer ? OneFrameResource.IndexBuffer : nullptr;
-#if !ENABLE_TANGRAM
 		Mesh.VertexFactory = OneFrameResource.VertexFactory;
-#else
-		ensure(false);
-#endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = OneFrameResource.PrimitiveUniformBuffer;
 		// previous l2w not used so treat as static
@@ -1041,11 +1033,7 @@ void FDynamicMeshBuilder::Draw(FPrimitiveDrawInterface* PDI,const FMatrix& Local
 		FMeshBatch Mesh;
 		FMeshBatchElement& BatchElement = Mesh.Elements[0];
 		BatchElement.IndexBuffer = HasValidIndexBuffer ? IndexBuffer : nullptr;
-#if !ENABLE_TANGRAM
 		Mesh.VertexFactory = VertexFactory;
-#else
-		ensure(false);
-#endif
 		Mesh.MaterialRenderProxy = MaterialRenderProxy;
 		BatchElement.PrimitiveUniformBufferResource = PrimitiveUniformBuffer;
 		// previous l2w not used so treat as static

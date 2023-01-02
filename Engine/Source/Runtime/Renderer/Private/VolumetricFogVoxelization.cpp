@@ -467,7 +467,6 @@ bool FVoxelizeVolumeMeshProcessor::Process(
 	ERasterizerFillMode MeshFillMode,
 	ERasterizerCullMode MeshCullMode)
 {
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
 
 	TMeshProcessorShaders<
@@ -534,9 +533,7 @@ bool FVoxelizeVolumeMeshProcessor::Process(
 				ShaderElementData);
 		}
 	}
-#else
-	ensure(false);
-#endif
+
 	return true;
 }
 
@@ -554,7 +551,7 @@ void VoxelizeVolumePrimitive(FVoxelizeVolumeMeshProcessor& PassMeshProcessor,
 	if (Material.GetMaterialDomain() == MD_Volume)
 	{
 		FMeshBatch LocalQuadMesh;
-#if !ENABLE_TANGRAM
+
 		// The voxelization shaders require camera facing quads as input
 		// Vertex factories like particle sprites can work as-is, everything else needs to override with a camera facing quad
 		const bool bOverrideWithQuadMesh = !OriginalMesh.VertexFactory->RendersPrimitivesAsCameraFacingSprites();
@@ -587,9 +584,6 @@ void VoxelizeVolumePrimitive(FVoxelizeVolumeMeshProcessor& PassMeshProcessor,
 
 		const uint64 DefaultBatchElementMask = ~0ull;
 		PassMeshProcessor.AddMeshBatch(Mesh, DefaultBatchElementMask, NumVoxelizationPasses, PrimitiveSceneProxy);
-#else
-		ensure(false);
-#endif
 	}
 }
 

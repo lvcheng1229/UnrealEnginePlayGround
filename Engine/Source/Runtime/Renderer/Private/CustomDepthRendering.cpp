@@ -350,7 +350,6 @@ bool FCustomDepthPassMeshProcessor::TryAddMeshBatch(
 	const bool bUsesMobileColorValue = FeatureLevel <= ERHIFeatureLevel::ES3_1;
 
 	bool bResult = true;
-#if !ENABLE_TANGRAM
 	if (BlendMode == BLEND_Opaque
 		&& MeshBatch.VertexFactory->SupportsPositionOnlyStream()
 		&& !Material.MaterialModifiesMeshPosition_RenderThread()
@@ -385,9 +384,7 @@ bool FCustomDepthPassMeshProcessor::TryAddMeshBatch(
 			bResult = Process<false, false>(MeshBatch, BatchElementMask, StaticMeshId, PrimitiveSceneProxy, *EffectiveMaterialRenderProxy, *EffectiveMaterial, MeshFillMode, MeshCullMode, MobileColorValue);
 		}
 	}
-#else
-	ensure(false);
-#endif
+
 	return bResult;
 }
 

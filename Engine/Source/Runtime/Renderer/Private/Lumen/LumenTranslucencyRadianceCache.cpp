@@ -180,13 +180,7 @@ void FLumenTranslucencyRadianceCacheMarkMeshProcessor::AddMeshBatch(const FMeshB
 				{
 					if (Lumen::ShouldRenderInTranslucencyRadianceCacheMarkPass(*PrimitiveSceneProxy, Material))
 					{
-						
-#if !ENABLE_TANGRAM
 						const FVertexFactory* VertexFactory = MeshBatch.VertexFactory;
-#else
-						const FVertexFactory* VertexFactory = nullptr;
-						ensure(false);
-#endif
 						FVertexFactoryType* VertexFactoryType = VertexFactory->GetType();
 
 						TMeshProcessorShaders<
