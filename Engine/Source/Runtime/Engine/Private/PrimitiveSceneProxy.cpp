@@ -61,6 +61,7 @@ bool SupportsCachingMeshDrawCommands(const FMeshBatch& MeshBatch)
 		// Vertex factory needs to support caching.
 		MeshBatch.VertexFactory->GetType()->SupportsCachingMeshDrawCommands();
 #else
+	ensure(false);
 	return false;
 #endif
 }

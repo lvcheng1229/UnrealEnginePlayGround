@@ -98,12 +98,7 @@ public:
 	FBrushSceneProxy(UBrushComponent* Component, ABrush* Owner):
 		FPrimitiveSceneProxy(Component),
 #if WITH_EDITORONLY_DATA
-		
-#if !ENABLE_TANGRAM
 		VertexFactory(GetScene().GetFeatureLevel(), "FBrushSceneProxy"),
-#else
-		VertexAttribute(GetScene().GetFeatureLevel(), "FBrushSceneProxy"),
-#endif
 		WireIndexBuffer(Component->Brush),
 #endif
 		bVolume(false),
@@ -178,12 +173,8 @@ public:
 					OutVerts.Push(Vertex);
 				}
 			}
-#if !ENABLE_TANGRAM
+
 			VertexBuffers.InitFromDynamicVertex(&VertexFactory, OutVerts);
-#else
-			VertexBuffers.InitFromDynamicVertex(&VertexAttribute, OutVerts);
-			UE_LOG(LogTanGram, Warning, TEXT("FArrowSceneProxy: where is vertexbuffers be used?"));
-#endif
 		}
 #endif
 	}
@@ -191,11 +182,7 @@ public:
 	virtual ~FBrushSceneProxy()
 	{
 #if WITH_EDITORONLY_DATA
-#if !ENABLE_TANGRAM
 		VertexFactory.ReleaseResource();
-#else
-		VertexAttribute.ReleaseResource();
-#endif	
 		WireIndexBuffer.ReleaseResource();
 		VertexBuffers.PositionVertexBuffer.ReleaseResource();
 		VertexBuffers.StaticMeshVertexBuffer.ReleaseResource();
@@ -293,7 +280,7 @@ public:
 #if !ENABLE_TANGRAM
 							Mesh.VertexFactory = &VertexFactory;
 #else
-							Mesh.TanGramVertexAttribute = &VertexAttribute;
+							ensure(false);
 #endif	
 							Mesh.MaterialRenderProxy = WireframeMaterial;
 							BatchElement.FirstIndex = 0;
@@ -421,11 +408,7 @@ public:
 
 private:
 #if WITH_EDITORONLY_DATA
-#if !ENABLE_TANGRAM
 	FLocalVertexFactory VertexFactory;
-#else
-	FTanGramLocalVertexAttribute VertexAttribute;
-#endif
 	FModelWireIndexBuffer WireIndexBuffer;
 	FStaticMeshVertexBuffers VertexBuffers;
 #endif

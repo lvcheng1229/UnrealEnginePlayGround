@@ -1132,12 +1132,7 @@ FNavMeshSceneProxy::FNavMeshSceneProxy(const UPrimitiveComponent* InComponent, F
 
 	if (Vertices.Num())
 	{
-#if !ENABLE_TANGRAM
 		VertexBuffers.InitFromDynamicVertex(&VertexFactory, Vertices);
-#else
-		ensure(false);
-#endif
-
 	}
 	if (IndexBuffer.Indices.Num())
 	{

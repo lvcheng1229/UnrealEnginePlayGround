@@ -152,12 +152,7 @@ public:
 				// Copy index buffer
 				NewSection->IndexBuffer.Indices = SrcSection.ProcIndexBuffer;
 
-#if !ENABLE_TANGRAM
 				NewSection->VertexBuffers.InitFromDynamicVertex(&NewSection->VertexFactory, Vertices, 4);
-#else
-				ensure(false);
-#endif
-
 
 				// Enqueue initialization of render resource
 				BeginInitResource(&NewSection->VertexBuffers.PositionVertexBuffer);

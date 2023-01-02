@@ -586,7 +586,7 @@ bool FStaticMeshSceneProxy::GetShadowMeshElement(int32 LODIndex, int32 BatchInde
 #if !ENABLE_TANGRAM
 		OutMeshBatch.VertexFactory = &VFs.VertexFactoryOverrideColorVertexBuffer;
 #else
-		OutMeshBatch.TanGramVertexAttribute = &VFs.TanGramLocalVertexAttributeOverrideColorVertexBuffer;
+		ensure(false);
 #endif	
 		OutMeshBatchElement.VertexFactoryUserData = ProxyLODInfo.OverrideColorVFUniformBuffer.GetReference();
 	}
@@ -596,9 +596,7 @@ bool FStaticMeshSceneProxy::GetShadowMeshElement(int32 LODIndex, int32 BatchInde
 		OutMeshBatch.VertexFactory = &VFs.VertexFactory;
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
 #else
-		OutMeshBatch.TanGramVertexAttribute = &VFs.TanGramLocalVertexAttribute;
-		//OutMeshBatchElement.VertexFactoryUserData = ;
-		ensure(UseGPUScene(GMaxRHIShaderPlatform, GMaxRHIFeatureLevel) == false/*&& RHISupportsManualVertexFetch(GMaxRHIShaderPlatform) == false*/);
+		ensure(false);
 #endif	
 	}
 
@@ -654,11 +652,9 @@ bool FStaticMeshSceneProxy::GetMeshElement(
 	UMaterialInterface* MaterialInterface = ProxyLODInfo.Sections[SectionIndex].Material;
 	const FMaterialRenderProxy* MaterialRenderProxy = MaterialInterface->GetRenderProxy();
 	const FMaterial& Material = MaterialRenderProxy->GetIncompleteMaterialWithFallback(FeatureLevel);
-#if !ENABLE_TANGRAM
+
 	const FVertexFactory* VertexFactory = nullptr;
-#else
-	const FTanGramVertexAttribute* TanGramVertexAttribute = nullptr;
-#endif
+
 	FMeshBatchElement& OutMeshBatchElement = OutMeshBatch.Elements[0];
 
 #if WITH_EDITORONLY_DATA
@@ -698,8 +694,7 @@ bool FStaticMeshSceneProxy::GetMeshElement(
 		OutMeshBatch.VertexFactory = &VFs.VertexFactory;
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
 #else
-		OutMeshBatch.TanGramVertexAttribute = &VFs.TanGramLocalVertexAttribute;
-		//ensure(false);
+		ensure(false);
 #endif	
 	}
 
@@ -710,11 +705,9 @@ bool FStaticMeshSceneProxy::GetMeshElement(
 
 	// No support for stateless dithered LOD transitions for movable meshes
 	const bool bDitheredLODTransition = !IsMovable() && Material.IsDitheredLODTransition();
-#if !ENABLE_TANGRAM
+
 	const uint32 NumPrimitives = SetMeshElementGeometrySource(LODIndex, SectionIndex, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, VertexFactory, OutMeshBatch);
-#else
-	const uint32 NumPrimitives = SetMeshElementGeometrySource(LODIndex, SectionIndex, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, TanGramVertexAttribute, OutMeshBatch);
-#endif
+
 	if (NumPrimitives > 0)
 	{
 		OutMeshBatch.SegmentIndex = SectionIndex;
@@ -795,11 +788,7 @@ bool FStaticMeshSceneProxy::GetWireframeMeshElement(int32 LODIndex, int32 BatchI
 	const FStaticMeshLODResources& LODModel = RenderData->LODResources[LODIndex];
 	const FStaticMeshVertexFactories& VFs = RenderData->LODVertexFactories[LODIndex];
 	const FLODInfo& ProxyLODInfo = LODs[LODIndex];
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = nullptr;
-#else
-	const FTanGramVertexAttribute* TanGramVertexAttribute = nullptr;
-#endif
 
 	FMeshBatchElement& OutBatchElement = OutMeshBatch.Elements[0];
 
@@ -833,12 +822,8 @@ bool FStaticMeshSceneProxy::GetWireframeMeshElement(int32 LODIndex, int32 BatchI
 
 	OutBatchElement.MinVertexIndex = 0;
 	OutBatchElement.MaxVertexIndex = LODModel.GetNumVertices() - 1;
-#if !ENABLE_TANGRAM
+
 	const uint32_t NumPrimitives = SetMeshElementGeometrySource(LODIndex, 0, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, VertexFactory, OutMeshBatch);
-#else
-	const uint32_t NumPrimitives = SetMeshElementGeometrySource(LODIndex, 0, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, TanGramVertexAttribute, OutMeshBatch);
-#endif
-	
 	SetMeshElementScreenSize(LODIndex, bDitheredLODTransition, OutMeshBatch);
 
 	return NumPrimitives > 0;
@@ -861,12 +846,8 @@ bool FStaticMeshSceneProxy::GetCollisionMeshElement(
 		return false;
 	}
 
-	
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory = nullptr;
-#else
-	const FTanGramVertexAttribute* TanGramVertexAttribute = nullptr;
-#endif
+
 	const FLODInfo& ProxyLODInfo = LODs[LODIndex];
 
 	const bool bWireframe = false;
@@ -874,11 +855,7 @@ bool FStaticMeshSceneProxy::GetCollisionMeshElement(
 	const bool bAllowPreCulledIndices = true;
 	const bool bDitheredLODTransition = false;
 
-#if !ENABLE_TANGRAM
 	SetMeshElementGeometrySource(LODIndex, SectionIndex, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, VertexFactory, OutMeshBatch);
-#else
-	SetMeshElementGeometrySource(LODIndex, SectionIndex, bWireframe, bUseReversedIndices, bAllowPreCulledIndices, TanGramVertexAttribute, OutMeshBatch);
-#endif
 
 	FMeshBatchElement& OutMeshBatchElement = OutMeshBatch.Elements[0];
 
@@ -1031,11 +1008,7 @@ uint32 FStaticMeshSceneProxy::SetMeshElementGeometrySource(
 	bool bWireframe,
 	bool bUseReversedIndices,
 	bool bAllowPreCulledIndices,
-#if !ENABLE_TANGRAM
 	const FVertexFactory* VertexFactory,
-#else
-	const FTanGramVertexAttribute* TanGramVertexAttribute,
-#endif
 	FMeshBatch& OutMeshBatch) const
 {
 	const FStaticMeshLODResources& LODModel = RenderData->LODResources[LODIndex];
@@ -1107,7 +1080,7 @@ uint32 FStaticMeshSceneProxy::SetMeshElementGeometrySource(
 #if !ENABLE_TANGRAM
 	OutMeshBatch.VertexFactory = VertexFactory;
 #else
-	OutMeshBatch.TanGramVertexAttribute = TanGramVertexAttribute;
+	ensure(false);
 #endif	
 	return NumPrimitives;
 }

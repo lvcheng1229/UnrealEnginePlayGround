@@ -67,12 +67,7 @@ public:
 			IndexBuffer.Indices[TriIdx * 3 + 2] = TriIdx * 3 + 2;
 		}
 
-#if !ENABLE_TANGRAM
 		VertexBuffers.InitFromDynamicVertex(&VertexFactory, Vertices);
-#else
-		ensure(false);
-#endif
-		
 
 		// Enqueue initialization of render resource
 		BeginInitResource(&VertexBuffers.PositionVertexBuffer);

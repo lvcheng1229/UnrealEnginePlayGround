@@ -958,71 +958,9 @@ void FStaticMeshVertexFactories::InitVertexFactory(
 		});
 }
 #else
-void FStaticMeshVertexFactories::InitVertexFactory(const FStaticMeshLODResources& LodResources, FTanGramLocalVertexAttribute& InOutVertexAttribute, uint32 LODIndex, const UStaticMesh* InParentMesh, bool bInOverrideColorVertexBuffer)
+void FStaticMeshVertexFactories::InitVertexFactory(const FStaticMeshLODResources& LodResources, FTanGramLocalVertexAttribute& InOutVertexFactory, uint32 LODIndex, const UStaticMesh* InParentMesh, bool bInOverrideColorVertexBuffer)
 {
-	check(InParentMesh != nullptr);
-
-	struct InitStaticMeshVertexAttributeParams
-	{
-		FTanGramLocalVertexAttribute* VertexAttribute;
-		const FStaticMeshLODResources* LODResources;
-#if WITH_EDITORONLY_DATA
-		const UStaticMesh* StaticMesh;
-#endif
-		uint32 LightMapCoordinateIndex;
-		uint32 LODIndex;
-		uint8 bOverrideColorVertexBuffer : 1;
-#if WITH_EDITORONLY_DATA
-		uint8 bIsCoarseProxy : 1;
-#endif
-	} Params;
-
-	uint32 LightMapCoordinateIndex = (uint32)InParentMesh->GetLightMapCoordinateIndex();
-	LightMapCoordinateIndex = LightMapCoordinateIndex < LodResources.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords() ? LightMapCoordinateIndex : LodResources.VertexBuffers.StaticMeshVertexBuffer.GetNumTexCoords() - 1;
-
-	Params.VertexAttribute = &InOutVertexAttribute;
-	Params.LODResources = &LodResources;
-	Params.bOverrideColorVertexBuffer = bInOverrideColorVertexBuffer;
-	Params.LightMapCoordinateIndex = LightMapCoordinateIndex;
-	Params.LODIndex = LODIndex;
-#if WITH_EDITORONLY_DATA
-	Params.StaticMesh = InParentMesh;
-	Params.bIsCoarseProxy = InParentMesh->NaniteSettings.bEnabled && InParentMesh->NaniteSettings.FallbackPercentTriangles < 1.0f;
-#endif
-
-	UE_LOG(LogTanGram, Warning, TEXT("FStaticMeshVertexFactories::InitVertexFactory need rename and merge function"));
-
-	// Initialize the static mesh's vertex factory.
-	ENQUEUE_RENDER_COMMAND(InitStaticMeshVertexFactory)(
-		[Params](FRHICommandListImmediate& RHICmdList)
-		{
-			FStaticMeshDataType Data;
-
-			Params.LODResources->VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer(nullptr, Data);
-			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer(nullptr, Data);
-			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer(nullptr, Data);
-			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindLightMapVertexBuffer(nullptr, Data, Params.LightMapCoordinateIndex);
-
-			// bOverrideColorVertexBuffer means we intend to override the color later.  We must construct the vertexfactory such that it believes a proper stride (not 0) is set for
-			// the color stream so that the real stream works later.
-			if (Params.bOverrideColorVertexBuffer)
-			{
-				FColorVertexBuffer::BindDefaultColorVertexBuffer(nullptr, Data, FColorVertexBuffer::NullBindStride::FColorSizeForComponentOverride);
-			}
-			//otherwise just bind the incoming buffer directly.
-			else
-			{
-				Params.LODResources->VertexBuffers.ColorVertexBuffer.BindColorVertexBuffer(nullptr, Data);
-			}
-
-			Data.LODLightmapDataIndex = Params.LODIndex;
-//#if WITH_EDITORONLY_DATA
-//			Data.bIsCoarseProxy = Params.bIsCoarseProxy;
-//			Data.StaticMesh = Params.StaticMesh;
-//#endif
-			Params.VertexAttribute->SetData(Data);
-			Params.VertexAttribute->InitResource();
-		});
+	ensure(false);
 }
 #endif
 
@@ -1064,40 +1002,7 @@ void FStaticMeshVertexFactories::InitResources(const FStaticMeshLODResources& Lo
 	
 		});
 #else
-	InitVertexFactory(LodResources, TanGramLocalVertexAttribute, LODIndex, Parent, false);
-	BeginInitResource(&TanGramLocalVertexAttribute);
-
-	InitVertexFactory(LodResources, TanGramLocalVertexAttributeOverrideColorVertexBuffer, LODIndex, Parent, true);
-	BeginInitResource(&TanGramLocalVertexAttributeOverrideColorVertexBuffer);
-
-	//TanGram : use TanGram VertexFactory
-
-	struct InitStaticMeshVertexFactoryParams
-	{
-		FTanGramLocalVertexAttribute* VertexAttribute;
-		const FStaticMeshLODResources* LODResources;
-	}Params;
-
-	Params.VertexAttribute = &TanGramLocalVertexAttribute;
-	Params.LODResources = &LodResources;
-
-	ENQUEUE_RENDER_COMMAND(InitStaticMeshTanGramVertexFactory)(
-		[Params](FRHICommandListImmediate& RHICmdList)
-		{
-			FStaticMeshDataType OutData;
-
-			//Set position by lod resources
-			Params.LODResources->VertexBuffers.PositionVertexBuffer.BindPositionVertexBuffer(nullptr, OutData);
-
-			//Set tangent by lod resources
-			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindTangentVertexBuffer(nullptr, OutData);
-			Params.LODResources->VertexBuffers.StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer(nullptr, OutData);
-
-			//set vertex factory and init resource
-			Params.VertexAttribute->SetData(OutData);
-			Params.VertexAttribute->InitResource();
-
-		});
+	ensure(false);
 #endif
 }
 
@@ -1292,11 +1197,7 @@ void FStaticMeshVertexBuffers::InitWithDummyData(FLocalVertexFactory* VertexFact
 	});
 }
 
-#if !ENABLE_TANGRAM
 void FStaticMeshVertexBuffers::InitFromDynamicVertex(FLocalVertexFactory* VertexFactory, TArray<FDynamicMeshVertex>& Vertices, uint32 NumTexCoords, uint32 LightMapIndex)
-#else
-void FStaticMeshVertexBuffers::InitFromDynamicVertex(FTanGramLocalVertexAttribute* VertexFactory, TArray<FDynamicMeshVertex>& Vertices, uint32 NumTexCoords, uint32 LightMapIndex)
-#endif
 {
 	check(NumTexCoords < MAX_STATIC_TEXCOORDS && NumTexCoords > 0);
 	check(LightMapIndex < NumTexCoords);
@@ -1342,22 +1243,12 @@ void FStaticMeshVertexBuffers::InitFromDynamicVertex(FTanGramLocalVertexAttribut
 			InitOrUpdateResource(&Self->StaticMeshVertexBuffer);
 			InitOrUpdateResource(&Self->ColorVertexBuffer);
 
-#if !ENABLE_TANGRAM
 			FLocalVertexFactory::FDataType Data;
 			Self->PositionVertexBuffer.BindPositionVertexBuffer(VertexFactory, Data);
 			Self->StaticMeshVertexBuffer.BindTangentVertexBuffer(VertexFactory, Data);
 			Self->StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer(VertexFactory, Data);
 			Self->StaticMeshVertexBuffer.BindLightMapVertexBuffer(VertexFactory, Data, LightMapIndex);
 			Self->ColorVertexBuffer.BindColorVertexBuffer(VertexFactory, Data);
-#else
-			UE_LOG(LogTanGram, Warning, TEXT("FStaticMeshVertexBuffers::InitFromDynamicVertex using nullptr for bindbuffer function"));
-			FStaticMeshDataType Data;
-			Self->PositionVertexBuffer.BindPositionVertexBuffer(nullptr, Data);
-			Self->StaticMeshVertexBuffer.BindTangentVertexBuffer(nullptr, Data);
-			Self->StaticMeshVertexBuffer.BindPackedTexCoordVertexBuffer(nullptr, Data);
-			Self->StaticMeshVertexBuffer.BindLightMapVertexBuffer(nullptr, Data, LightMapIndex);
-			Self->ColorVertexBuffer.BindColorVertexBuffer(nullptr, Data);
-#endif
 			VertexFactory->SetData(Data);
 
 			InitOrUpdateResource(VertexFactory);

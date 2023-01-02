@@ -227,7 +227,7 @@ inline int32 FViewElementPDI::DrawMesh(const FMeshBatch& Mesh)
 					const bool bPrimitiveShaderDataComesFromSceneBuffer = NewMesh->VertexFactory->GetPrimitiveIdStreamIndex(FeatureLevel, EVertexInputStreamType::Default) >= 0;
 #else
 					const bool bPrimitiveShaderDataComesFromSceneBuffer = false;
-					ensure(UseGPUScene(GMaxRHIShaderPlatform, FeatureLevel) == false);
+					ensure(false);
 #endif
 					for (int32 ElementIndex = 0; ElementIndex < NewMesh->Elements.Num(); ElementIndex++)
 					{
@@ -243,8 +243,7 @@ inline int32 FViewElementPDI::DrawMesh(const FMeshBatch& Mesh)
 						checkf(bPrimitiveShaderDataComesFromSceneBuffer || NewMesh->Elements[ElementIndex].PrimitiveUniformBufferResource != NULL,
 							TEXT("FMeshBatch was not properly setup.  The primitive uniform buffer must be specified."));
 #else
-						checkf(false || NewMesh->Elements[ElementIndex].PrimitiveUniformBufferResource != NULL,
-								TEXT("FMeshBatch was not properly setup.  The primitive uniform buffer must be specified."));
+					ensure(false);
 #endif
 
 					}

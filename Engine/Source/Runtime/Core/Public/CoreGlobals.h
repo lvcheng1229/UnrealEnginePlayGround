@@ -47,9 +47,7 @@ CORE_API DECLARE_LOG_CATEGORY_EXTERN(LogVirtualization, Log, All);
 
 // Temporary log category, generally you should not check things in that use this
 CORE_API DECLARE_LOG_CATEGORY_EXTERN(LogTemp, Log, All);
-#if ENABLE_TANGRAM
-CORE_API DECLARE_LOG_CATEGORY_EXTERN(LogTanGram, Log, All);
-#endif
+
 // Platform specific logs, set here to make it easier to use them from anywhere
 // need another layer of macro to help using a define in a define
 #define DECLARE_LOG_CATEGORY_EXTERN_HELPER(A,B,C) DECLARE_LOG_CATEGORY_EXTERN(A,B,C)

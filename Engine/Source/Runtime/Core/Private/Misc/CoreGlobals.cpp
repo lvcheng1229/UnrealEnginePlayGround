@@ -690,9 +690,7 @@ DEFINE_LOG_CATEGORY(LogMemory);
 DEFINE_LOG_CATEGORY(LogProfilingDebugging);
 DEFINE_LOG_CATEGORY(LogTemp);
 DEFINE_LOG_CATEGORY(LogVirtualization);
-#if ENABLE_TANGRAM
-DEFINE_LOG_CATEGORY(LogTanGram);
-#endif
+
 // need another layer of macro to help using a define in a define
 #define DEFINE_LOG_CATEGORY_HELPER(A) DEFINE_LOG_CATEGORY(A)
 #ifdef PLATFORM_GLOBAL_LOG_CATEGORY

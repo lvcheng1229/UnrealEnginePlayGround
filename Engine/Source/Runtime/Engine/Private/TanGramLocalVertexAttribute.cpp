@@ -55,8 +55,5 @@ void FTanGramLocalVertexAttribute::InitRHI()
 
 void FTanGramLocalVertexAttribute::SetData(const FStaticMeshDataType& InData)
 {
-	check(IsInRenderingThread());
-	check((InData.ColorComponent.Type == VET_None) || (InData.ColorComponent.Type == VET_Color));
 	TanGramVertexData = InData;
-	UpdateRHI();
 }

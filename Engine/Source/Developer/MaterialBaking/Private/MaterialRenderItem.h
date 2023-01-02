@@ -26,20 +26,12 @@ public:
 		{
 			VertexBuffer = Other.VertexBuffer;
 			IndexBuffer = Other.IndexBuffer;
-#if !ENABLE_TANGRAM
 			VertexFactory = Other.VertexFactory;
-#else
-			VertexAttribute = Other.VertexAttribute;
-#endif
 			PrimitiveUniformBuffer = Other.PrimitiveUniformBuffer;
 
 			Other.VertexBuffer = nullptr;
 			Other.IndexBuffer = nullptr;
-#if !ENABLE_TANGRAM
 			Other.VertexFactory = nullptr;
-#else
-			Other.VertexAttribute = nullptr;
-#endif
 			Other.PrimitiveUniformBuffer = nullptr;
 		}
 	}
@@ -48,12 +40,8 @@ public:
 	{
 		FMeshBuilderOneFrameResources::~FMeshBuilderOneFrameResources();
 		VertexBuffer = nullptr;
-#if !ENABLE_TANGRAM
-		VertexFactory = nullptr;
-#else
-		VertexAttribute = nullptr;
-#endif
 		IndexBuffer = nullptr;
+		VertexFactory = nullptr;
 		PrimitiveUniformBuffer = nullptr;
 	}
 };
