@@ -39,7 +39,7 @@ extern ENGINE_API TUniformBufferRef<FLocalVertexFactoryUniformShaderParameters> 
  */
 class ENGINE_API FLocalVertexFactory : public FVertexFactory
 {
-	public: static FVertexFactoryType StaticType; virtual FVertexFactoryType* GetType() const override;;
+	DECLARE_VERTEX_FACTORY_TYPE(FLocalVertexFactory);
 public:
 
 	FLocalVertexFactory(ERHIFeatureLevel::Type InFeatureLevel, const char* InDebugName)

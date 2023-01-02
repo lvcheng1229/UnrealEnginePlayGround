@@ -223,7 +223,6 @@ private:
 };
 using FShaderCommonCompileJobPtr = TRefCountPtr<FShaderCommonCompileJob>;
 
-#if !ENABLE_TANGRAM
 struct FShaderCompileJobKey
 {
 	explicit FShaderCompileJobKey(const FShaderType* InType = nullptr, const FVertexFactoryType* InVFType = nullptr, int32 InPermutationId = 0)
@@ -236,31 +235,10 @@ struct FShaderCompileJobKey
 	const FVertexFactoryType* VFType;
 	int32 PermutationId;
 };
-
 inline bool operator==(const FShaderCompileJobKey& Lhs, const FShaderCompileJobKey& Rhs)
 {
 	return Lhs.VFType == Rhs.VFType && Lhs.ShaderType == Rhs.ShaderType && Lhs.PermutationId == Rhs.PermutationId;
 }
-
-#else
-struct FShaderCompileJobKey
-{
-	explicit FShaderCompileJobKey(const FShaderType* InType = nullptr, const FTanGramVertexAttributeType* InTVAType = nullptr, int32 InPermutationId = 0)
-		: ShaderType(InType), TVAType(InTVAType), PermutationId(InPermutationId)
-	{}
-
-	uint32 MakeHash(uint32 Id) const { return HashCombine(HashCombine(HashCombine(GetTypeHash(Id), GetTypeHash(TVAType)), GetTypeHash(ShaderType)), GetTypeHash(PermutationId)); }
-
-	const FShaderType* ShaderType;
-	const FTanGramVertexAttributeType* TVAType;
-	int32 PermutationId;
-};
-
-inline bool operator==(const FShaderCompileJobKey& Lhs, const FShaderCompileJobKey& Rhs)
-{
-	return Lhs.TVAType == Rhs.TVAType && Lhs.ShaderType == Rhs.ShaderType && Lhs.PermutationId == Rhs.PermutationId;
-}
-#endif
 inline bool operator!=(const FShaderCompileJobKey& Lhs, const FShaderCompileJobKey& Rhs)
 {
 	return !operator==(Lhs, Rhs);
@@ -285,12 +263,8 @@ public:
 	FShaderCompilerOutput Output;
 
 	// List of pipelines that are sharing this job.
-#if !ENABLE_TANGRAM
 	TMap<const FVertexFactoryType*, TArray<const FShaderPipelineType*>> SharingPipelines;
-#else
-	TMap<const FTanGramVertexAttribute*, TArray<const FShaderPipelineType*>> SharingPipelines;
-#endif
-	
+
 	virtual ENGINE_API FInputHash GetInputHash() override;
 	virtual ENGINE_API void SerializeOutput(FArchive& Ar) override;
 
@@ -299,7 +273,7 @@ public:
 		Key(InKey)
 	{}
 };
-#if !ENABLE_TANGRAM
+
 struct FShaderPipelineCompileJobKey
 {
 	explicit FShaderPipelineCompileJobKey(const FShaderPipelineType* InType = nullptr, const FVertexFactoryType* InVFType = nullptr, int32 InPermutationId = 0)
@@ -316,24 +290,6 @@ inline bool operator==(const FShaderPipelineCompileJobKey& Lhs, const FShaderPip
 {
 	return Lhs.ShaderPipeline == Rhs.ShaderPipeline && Lhs.VFType == Rhs.VFType && Lhs.PermutationId == Rhs.PermutationId;
 }
-#else
-struct FShaderPipelineCompileJobKey
-{
-	explicit FShaderPipelineCompileJobKey(const FShaderPipelineType* InType = nullptr, const FTanGramVertexAttributeType* InTVAType = nullptr, int32 InPermutationId = 0)
-		: ShaderPipeline(InType), TVAType(InTVAType), PermutationId(InPermutationId)
-	{}
-
-	uint32 MakeHash(uint32 Id) const { return HashCombine(HashCombine(HashCombine(GetTypeHash(Id), GetTypeHash(ShaderPipeline)), GetTypeHash(TVAType)), GetTypeHash(PermutationId)); }
-
-	const FShaderPipelineType* ShaderPipeline;
-	const FTanGramVertexAttributeType* TVAType;
-	int32 PermutationId;
-};
-inline bool operator==(const FShaderPipelineCompileJobKey& Lhs, const FShaderPipelineCompileJobKey& Rhs)
-{
-	return Lhs.ShaderPipeline == Rhs.ShaderPipeline && Lhs.TVAType == Rhs.TVAType && Lhs.PermutationId == Rhs.PermutationId;
-}
-#endif
 inline bool operator!=(const FShaderPipelineCompileJobKey& Lhs, const FShaderPipelineCompileJobKey& Rhs)
 {
 	return !operator==(Lhs, Rhs);
@@ -1226,11 +1182,7 @@ extern ENGINE_API void GlobalBeginCompileShader(
 /** Enqueues a shader compile job with GShaderCompilingManager. */
 extern ENGINE_API void GlobalBeginCompileShader(
 	const FString& DebugGroupName,
-#if !ENABLE_TANGRAM
 	const class FVertexFactoryType* VFType,
-#else
-	const class FTanGramVertexAttributeType* TVATypes,
-#endif
 	const class FShaderType* ShaderType,
 	const class FShaderPipelineType* ShaderPipelineType,
 	int32 PermutationId,

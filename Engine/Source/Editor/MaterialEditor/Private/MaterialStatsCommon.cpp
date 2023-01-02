@@ -518,7 +518,6 @@ void FMaterialStatsUtils::GetRepresentativeInstructionCounts(TArray<FShaderInstr
 		}
 		else
 		{
-#if !ENABLE_TANGRAM
 			for (auto DescriptionPair : ShaderTypeNamesAndDescriptions)
 			{
 				FVertexFactoryType* FactoryType = FindVertexFactoryType(DescriptionPair.Key);
@@ -556,9 +555,6 @@ void FMaterialStatsUtils::GetRepresentativeInstructionCounts(TArray<FShaderInstr
 					}
 				}
 			}
-#else
-		ensure(false);
-#endif
 		}
 	}
 }

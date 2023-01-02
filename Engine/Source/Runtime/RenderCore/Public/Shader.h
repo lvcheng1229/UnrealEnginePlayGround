@@ -22,8 +22,6 @@
 #include "HAL/ThreadSafeBool.h"
 #include <atomic>
 
-#include "TanGramVertexAttribute.h"
-
 // For FShaderUniformBufferParameter
 
 #if WITH_EDITOR
@@ -41,9 +39,6 @@ class FShaderMapBase;
 class FShaderPipelineType;
 class FShaderType;
 class FVertexFactoryType;
-#if ENABLE_TANGRAM
-class FTanGramVertexAttributeType;
-#endif
 class FShaderParametersMetadata;
 class FShaderMapPointerTable;
 struct FShaderCompilerOutput;

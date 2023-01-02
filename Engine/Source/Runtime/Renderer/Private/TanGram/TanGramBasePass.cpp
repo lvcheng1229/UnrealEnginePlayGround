@@ -13,7 +13,7 @@
 //shawnshtang
 //TanGram
 
-PRAGMA_DISABLE_OPTIMIZATION
+//PRAGMA_DISABLE_OPTIMIZATION
 
 //Temp
 static bool UseSkyReflectionCapture(const FScene* RenderScene)
@@ -203,7 +203,7 @@ bool GetUniformTanGramBasePassShaders(
 	ShaderTypes.AddShaderType<TTanGramBasePassPS<TTanGramUniformLightMapPolicy<ETanGramLightMapPolicyType::TG_LMP_NO_LIGHTMAP>,NumMovablePointLights>>();
 
 	FMaterialShaders Shaders;
-	if (!Material.TryGetShaders(ShaderTypes, nullptr, Shaders))
+	if (!Material.TryGetShaders(ShaderTypes, VertexFactoryType, Shaders))
 	{
 		return false;
 	}
@@ -290,17 +290,19 @@ bool FTanGramBasePassProcessor::Process(const FMeshBatch& RESTRICT MeshBatch, ui
 		}
 	}
 
-
+#if !ENABLE_TANGRAM
 	if (!TanGram::GetShaders(
 		NumMovablePointLights,
 		MaterialResource,
-		nullptr,
+		MeshBatch.VertexFactory->GetType(),
 		BasePassShaders.VertexShader,
 		BasePassShaders.PixelShader))
 	{
 		return false;
 	}
-
+#else
+	ensure(false);
+#endif
 	
 	FMeshPassProcessorRenderState DrawRenderState(PassDrawRenderState);
 	//DrawRenderState.SetDepthStencilState

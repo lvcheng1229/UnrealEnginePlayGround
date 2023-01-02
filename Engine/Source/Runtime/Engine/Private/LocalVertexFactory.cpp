@@ -403,14 +403,14 @@ IMPLEMENT_VERTEX_FACTORY_PARAMETER_TYPE(FLocalVertexFactory, SF_RayHitGroup, FLo
 IMPLEMENT_VERTEX_FACTORY_PARAMETER_TYPE(FLocalVertexFactory, SF_Compute, FLocalVertexFactoryShaderParameters);
 #endif // RHI_RAYTRACING
 
-FVertexFactoryType FLocalVertexFactory::StaticType(
-	L"FLocalVertexFactory",
-	L"/Engine/Private/LocalVertexFactory.ush",
-	EVertexFactoryFlags::UsedWithMaterials | EVertexFactoryFlags::SupportsStaticLighting | EVertexFactoryFlags::SupportsDynamicLighting | EVertexFactoryFlags::SupportsPrecisePrevWorldPos | EVertexFactoryFlags::SupportsPositionOnly | EVertexFactoryFlags::SupportsCachingMeshDrawCommands | EVertexFactoryFlags::SupportsPrimitiveIdStream | EVertexFactoryFlags::SupportsRayTracing | EVertexFactoryFlags::SupportsRayTracingDynamicGeometry,
-	&ConstructVertexFactoryParameters<FLocalVertexFactory>,
-	&GetVertexFactoryParametersLayout<FLocalVertexFactory>,
-	&GetVertexFactoryParametersElementShaderBindings<FLocalVertexFactory>,
-	FLocalVertexFactory::ShouldCompilePermutation,
-	FLocalVertexFactory::ModifyCompilationEnvironment,
-	FLocalVertexFactory::ValidateCompiledResult );
-FVertexFactoryType* FLocalVertexFactory::GetType() const { return &StaticType; };
+IMPLEMENT_VERTEX_FACTORY_TYPE(FLocalVertexFactory,"/Engine/Private/LocalVertexFactory.ush",
+	  EVertexFactoryFlags::UsedWithMaterials
+	| EVertexFactoryFlags::SupportsStaticLighting
+	| EVertexFactoryFlags::SupportsDynamicLighting
+	| EVertexFactoryFlags::SupportsPrecisePrevWorldPos
+	| EVertexFactoryFlags::SupportsPositionOnly
+	| EVertexFactoryFlags::SupportsCachingMeshDrawCommands
+	| EVertexFactoryFlags::SupportsPrimitiveIdStream
+	| EVertexFactoryFlags::SupportsRayTracing
+	| EVertexFactoryFlags::SupportsRayTracingDynamicGeometry
+);

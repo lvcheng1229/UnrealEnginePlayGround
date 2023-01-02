@@ -249,19 +249,13 @@ public:
 
 		{
 			TArray<FShaderType*> ShaderTypes;
-			TArray<const FShaderPipelineType*> ShaderPipelineTypes;
-#if !ENABLE_TANGRAM
 			TArray<FVertexFactoryType*> VFTypes;
+			TArray<const FShaderPipelineType*> ShaderPipelineTypes;
 			GetDependentShaderAndVFTypes(GMaxRHIShaderPlatform, ResourceId.LayoutParams, ShaderTypes, ShaderPipelineTypes, VFTypes);
 
 			// Overwrite the shader map Id's dependencies with ones that came from the FMaterial actually being compiled (this)
 			// This is necessary as we change FMaterial attributes like GetShadingModels(), which factor into the ShouldCache functions that determine dependent shader types
 			ResourceId.SetShaderDependencies(ShaderTypes, ShaderPipelineTypes, VFTypes, GMaxRHIShaderPlatform);
-#else
-			TArray<FTanGramVertexAttributeType*> TVATypes;
-			GetDependentShaderAndVFTypes(GMaxRHIShaderPlatform, ResourceId.LayoutParams, ShaderTypes, ShaderPipelineTypes, TVATypes);
-			ResourceId.SetShaderDependencies(ShaderTypes, ShaderPipelineTypes, TVATypes, GMaxRHIShaderPlatform);
-#endif
 		}
 
 		// Override with a special usage so we won't re-use the shader map used by the material for rendering

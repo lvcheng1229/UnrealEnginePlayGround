@@ -695,10 +695,10 @@ bool FStaticMeshSceneProxy::GetMeshElement(
 	else
 	{
 #if !ENABLE_TANGRAM
-		VertexFactory = &VFs.VertexFactory;
+		OutMeshBatch.VertexFactory = &VFs.VertexFactory;
 		OutMeshBatchElement.VertexFactoryUserData = VFs.VertexFactory.GetUniformBuffer();
 #else
-		TanGramVertexAttribute = &VFs.TanGramLocalVertexAttribute;
+		OutMeshBatch.TanGramVertexAttribute = &VFs.TanGramLocalVertexAttribute;
 		//ensure(false);
 #endif	
 	}
@@ -1372,10 +1372,6 @@ void FStaticMeshSceneProxy::DrawStaticElements(FStaticPrimitiveDrawInterface* PD
 								// Standard mesh elements.
 								// If we have submitted an optimized shadow-only mesh, remaining mesh elements must not cast shadows.
 								FMeshBatch MeshBatch(BaseMeshBatch);
-#if ENABLE_TANGRAM
-								ensure(BaseMeshBatch.TanGramVertexAttribute != nullptr);
-								ensure(MeshBatch.TanGramVertexAttribute != nullptr);
-#endif
 								MeshBatch.CastShadow &= !bUseUnifiedMeshForShadow;
 								MeshBatch.bUseAsOccluder &= !bUseUnifiedMeshForDepth;
 								MeshBatch.bUseForDepthPass &= !bUseUnifiedMeshForDepth;

@@ -1359,12 +1359,12 @@ bool FMeshBatch::Validate(const FPrimitiveSceneProxy* PrimitiveSceneProxy, ERHIF
 
 	if (!TanGramVertexAttribute)
 	{
-		return LogMeshError(TEXT("Mesh has a null vertex attribute!"));
+		return LogMeshError(TEXT("Mesh has a null vertex factory!"));
 	}
 
 	if (!TanGramVertexAttribute->IsInitialized())
 	{
-		return LogMeshError(TEXT("Mesh has an uninitialized vertex attribute!"));
+		return LogMeshError(TEXT("Mesh has an uninitialized vertex factory!"));
 	}
 
 	for (int32 Index = 0; Index < Elements.Num(); ++Index)
