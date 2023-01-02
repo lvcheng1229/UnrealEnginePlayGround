@@ -24,23 +24,6 @@ class RENDERER_API FTanGramUniformLightMapPolicyShaderParametersType
 {
 	DECLARE_TYPE_LAYOUT(FTanGramUniformLightMapPolicyShaderParametersType, NonVirtual);
 public:
-	void Bind(const FShaderParameterMap& ParameterMap)
-	{
-		PrecomputedLightingBufferParameter.Bind(ParameterMap, TEXT("PrecomputedLightingBuffer"));
-		IndirectLightingCacheParameter.Bind(ParameterMap, TEXT("IndirectLightingCache"));
-		LightmapResourceCluster.Bind(ParameterMap, TEXT("LightmapResourceCluster"));
-	}
-
-	void Serialize(FArchive& Ar)
-	{
-		Ar << PrecomputedLightingBufferParameter;
-		Ar << IndirectLightingCacheParameter;
-		Ar << LightmapResourceCluster;
-	}
-
-	LAYOUT_FIELD(FShaderUniformBufferParameter, PrecomputedLightingBufferParameter);
-	LAYOUT_FIELD(FShaderUniformBufferParameter, IndirectLightingCacheParameter);
-	LAYOUT_FIELD(FShaderUniformBufferParameter, LightmapResourceCluster);
 };
 
 class RENDERER_API FTanGramUniformLightMapPolicy
@@ -49,29 +32,10 @@ public:
 	using ElementDataType = const FLightCacheInterface*;
 	using VertexParametersType = FTanGramUniformLightMapPolicyShaderParametersType;
 	using PixelParametersType = FTanGramUniformLightMapPolicyShaderParametersType;
-
-	static bool ShouldCompilePermutation(const FMeshMaterialShaderPermutationParameters& Parameters)
-	{
-		return false; // This one does not compile shaders since we can't tell which policy to use.
-	}
 	
-	static void ModifyCompilationEnvironment(const FMaterialShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
-	{}
 
 	FTanGramUniformLightMapPolicy(ETanGramLightMapPolicyType InIndirectPolicy) : IndirectPolicy(InIndirectPolicy) {}
-	
-	static void GetVertexShaderBindings(
-	const FPrimitiveSceneProxy* PrimitiveSceneProxy,
-	const ElementDataType& ShaderElementData,
-	const VertexParametersType* VertexShaderParameters,
-	FMeshDrawSingleShaderBindings& ShaderBindings);
 
-	static void GetPixelShaderBindings(
-		const FPrimitiveSceneProxy* PrimitiveSceneProxy,
-		const ElementDataType& ShaderElementData,
-		const PixelParametersType* PixelShaderParameters,
-		FMeshDrawSingleShaderBindings& ShaderBindings);
-	
 	friend bool operator==(const FTanGramUniformLightMapPolicy A,const FTanGramUniformLightMapPolicy B)
 	{
 		return A.IndirectPolicy == B.IndirectPolicy;
