@@ -148,9 +148,9 @@ bool FEditorPrimitivesBasePassMeshProcessor::ProcessMobileShadingPath(const FMes
 	TTanGramBasePassShaderElementData<FTanGramUniformLightMapPolicy> ShaderElementData(nullptr, false);
 	ShaderElementData.InitializeMeshMaterialData(ViewIfDynamicMeshCommand, PrimitiveSceneProxy, MeshBatch, StaticMeshId, false);
 
-	const FMeshDrawCommandSortKey SortKey = CalculateMeshStaticSortKey(BasePassShaders.VertexShader, BasePassShaders.PixelShader);
-
-	BuildMeshDrawCommands(
+	//const FMeshDrawCommandSortKey SortKey = CalculateMeshStaticSortKey(BasePassShaders.VertexShader, BasePassShaders.PixelShader);
+	const FMeshDrawCommandSortKey SortKey = FMeshDrawCommandSortKey::Default;
+	BuildTanGramMeshDrawCommands(
 		MeshBatch,
 		BatchElementMask,
 		PrimitiveSceneProxy,

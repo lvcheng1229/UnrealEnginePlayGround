@@ -25,7 +25,7 @@
 #include "SkyAtmosphereRendering.h"
 #include "RenderUtils.h"
 #include "DebugViewModeRendering.h"
-
+#include "TanGramShader.h"
 
 template<typename LightMapPolicyType>
 class TTanGramBasePassShaderElementData : public FMeshMaterialShaderElementData
@@ -41,7 +41,8 @@ public:
 	const bool bCanReceiveCSM;
 };
 
-class TTanGramBasePassVS : public FMeshMaterialShader
+//class TTanGramBasePassVS : public FMeshMaterialShader
+class TTanGramBasePassVS : public FTanGramShader
 {
 public:
 	using ShaderMetaType = FMeshMaterialShaderType;
@@ -83,23 +84,25 @@ public:
 	static constexpr int CounterBase = 189623592;
 	using DerivedType =  TTanGramBasePassVS;
 	static constexpr ETypeLayoutInterface::Type InterfaceType = ETypeLayoutInterface::NonVirtual;
-	template<int Counter> struct InternalLinkType
+
+	template<int Counter>
+	struct InternalLinkType
 	{
 		static __forceinline void Initialize(FTypeLayoutDesc& TypeDesc) {}
 	};
 	
 public:
-	static bool ShouldCompilePermutation(const FMeshMaterialShaderPermutationParameters& Parameters)
+	static bool ShouldCompilePermutation(const FTanGramShaderPermutationParameters& Parameters)
 	{		
 		return true;
 	}
 
-	static void ModifyCompilationEnvironment(const FMaterialShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+	static void ModifyCompilationEnvironment(const FTanGramShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
 	{
 	}
 	
 	TTanGramBasePassVS(const ShaderMetaType::CompiledShaderInitializerType& Initializer) :
-		FMeshMaterialShader(Initializer)
+		FTanGramShader(Initializer)
 	{}
 
 	TTanGramBasePassVS() {}
